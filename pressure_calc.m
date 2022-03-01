@@ -61,10 +61,38 @@ for i = 1:length(F)
 end
 
 
-thetas = reshape(thetas, [16348, 1]); 
-Cp = reshape(Cp, [16348, 1]); 
+thetas = reshape(thetas, [length(thetas), 1]); 
+Cp = reshape(Cp, [length(Cp), 1]); 
+
+
+%% Finding CP along the velocity application line
+vect_indices_1 = find(P(:,2) > -5); % the y coordinate will be 0 in the x-z plane, where the velocity is applied
+vect_indices_2 = find(P(:,2) < 5); 
+[vect_indices, eh] = intersect(vect_indices_1, vect_indices_2); 
+
+cross_sec_cp = []; 
+cross_sec_X = [];
+
+enter_index = 1; 
+
+for i = 1:length(vect_indices)
+    k = vect_indices(i);
+    cross_sec_X(enter_index) = P(k, 1); 
+    cross_sec_cp(enter_index) = Cp(k); 
+    enter_index = enter_index + 1; 
+end
+
+cross_sec_cp = reshape(cross_sec_cp, [length(cross_sec_cp), 1]);
+cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
 
 %% Plotting
-f = figure;
+figure(1); 
 trisurf(TR, Cp, 'EdgeColor', 'none');  
+hold on; 
+axis equal; 
 colorbar;
+colormapeditor; 
+
+%% Plotting Cps along cross section
+figure(2); 
+scatter(cross_sec_X, cross_sec_cp); 
