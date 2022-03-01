@@ -85,6 +85,10 @@ end
 cross_sec_cp = reshape(cross_sec_cp, [length(cross_sec_cp), 1]);
 cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
 
+% write to csv
+ D = [cross_sec_X cross_sec_cp]; 
+ csvwrite('Cp_along_xzplane', D);
+
 %% Plotting
 figure(1); 
 trisurf(TR, Cp, 'EdgeColor', 'none');  
@@ -96,3 +100,6 @@ colormapeditor;
 %% Plotting Cps along cross section
 figure(2); 
 scatter(cross_sec_X, cross_sec_cp); 
+xlabel ('X (mm)'); 
+ylabel ('C_p'); 
+title('C_p v/s X Coordinate of Triangulation Points in X-Z Plane for Modified Newtonian Calculation')
