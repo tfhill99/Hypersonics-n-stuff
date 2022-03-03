@@ -4,7 +4,7 @@ clear;
 alpha = deg2rad(0); 
 velocity = 7396.6; %m/s
 gamma = 1.4; 
-Pstag_P2 =  (1 + (gamma-1)/2*M2^2)^(gamma/(gamma-1))
+Pstag_P2 =  ((gamma+1)^2*M1^2/(4*gamma*M1^2-2*(gamma-1)))^(gamma/(gamma-1))
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1^2-1)
 C_p0_limit =  (4/(gamma+1))*((gamma+1)^2/(4*gamma))^((gamma)/(gamma-1));
 C_p0 = 2/(gamma*M1^2)*(P2_P1 * Pstag_P2-1);
