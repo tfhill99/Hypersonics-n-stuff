@@ -9,6 +9,8 @@ C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 % read the mesh and find the vectors
 [TR, P, F] = read_mesh(file); 
 
+disp('loaded mesh')
+
 vx = velocity.*sin(alpha); 
 vy = 0; 
 vz = velocity.*cos(alpha);  
@@ -18,6 +20,8 @@ V(2,:) = vy;
 V(3,:) = vz;
 thetas = []; 
 Cps = [];
+
+disp('starting cp calc')
 
 for j = 1:length(M1)
     for i = 1:length(F)
@@ -30,11 +34,15 @@ for j = 1:length(M1)
             Cps(i,j) = C_p0(j) * (sin(thetas(i)))^2; % Newtonian Theory
         end
     end
+    disp(j)
 end
+
+disp('ending cp calc')
 
 thetas = reshape(thetas, [length(thetas), 1]); 
 Cps = reshape(Cps, [length(Cps), length(M1)]); 
 
+%{
 % finding cps along the velocity vector line
 vect_indices_1 = find(P(:,2) > -5); % the y coordinate will be 0 in the x-z plane, where the velocity is applied
 vect_indices_2 = find(P(:,2) < 5); 
@@ -49,6 +57,7 @@ for j = 1:length(M1)
     for i = 1:length(vect_indices)
         k = vect_indices(i);
         cross_sec_X(enter_index) = P(k, 1); 
+        disp('Im here')
         cross_sec_cp(enter_index, j) = Cps(k, j); 
         enter_index = enter_index + 1; 
     end
@@ -75,8 +84,13 @@ cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
     title('Cp vs Mach');
  end
 
+%}
+
+ disp('starting other calc')
  % calculating pressure at each point for each mach
  rho = density(1:length(M1)); 
+ size(density)
+ size(rho)
  P = pressure(1:length(M1)); 
  pressures = [];
 
@@ -101,12 +115,17 @@ cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
      f_x(i) = f_x_curr; 
  end
 
+ disp('ending other calc')
+
  max_R = 765/1000; %m
  reff_area = pi * max_R * max_R; 
 
- C_L = f_z ./ (rho .* velocity.^2);  
+ size(f_z)
+
+ C_L = transpose(f_z) ./ (rho .* velocity.^2);  
+ size(C_L)
  C_L = C_L / (0.5 * reff_area); 
- C_D = f_x ./ (rho .* velocity.^2);
+ C_D = transpose(f_x) ./ (rho .* velocity.^2);
  C_D = C_D / (0.5 * reff_area);
 
 end
