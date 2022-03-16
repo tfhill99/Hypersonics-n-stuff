@@ -61,7 +61,7 @@ cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
  D = [cross_sec_X cross_sec_cp]; 
  csvwrite('Cp_along_xzplane', D);
 
- if plotting == True
+ if plotting == true
     % Cps vs Mach
     Cpps = Cps(1,:);
      

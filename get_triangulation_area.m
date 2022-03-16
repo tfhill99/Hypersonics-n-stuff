@@ -1,4 +1,4 @@
-function [area, area_list] = get_triangulation_area(TR)
+function [area, areas] = get_triangulation_area(TR)
 points = TR.Points; 
 connections = TR.ConnectivityList; 
 area = 0; 

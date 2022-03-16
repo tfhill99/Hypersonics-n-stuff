@@ -8,7 +8,7 @@ C_D_change{1} = C_D;
 C_L_change = {};
 C_L_change{1} = C_L;
 plotting = false;
-file = 'CAD_capsule_3.stl'
+file = 'CAD_capsule_3.stl';
 [M1, V, Z, time, rho, P] = convergence_numsoln(C_D, C_L, time, gamma_0);
 "finished here"
 [C_D, C_L] = pressure_calc(M1, V, Z, alpha, plotting, rho, P, file);
