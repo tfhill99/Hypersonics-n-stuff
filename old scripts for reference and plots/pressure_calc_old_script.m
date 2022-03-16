@@ -111,6 +111,7 @@ axis equal;
 colorbar;
 colormapeditor;
 
+%{
 k = 0;
 figure2 = figure;
 for i = 525:775
@@ -130,6 +131,7 @@ for i = 525:775
     %path='Downloads:\figures\';
     %saveas(figure(i),fullfile(path,['myPlot' num2str(i) '.jpeg']));
 end
+%}
 
 %% Plotting Cp vs Mach
 Cpps = Cps(1,:);
