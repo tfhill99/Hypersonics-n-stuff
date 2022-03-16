@@ -1,9 +1,8 @@
-C_D = 1.4*ones(1,1000);
-C_L = zeros(1,1000);
+C_D = 1.4*ones(1,500)';
+C_L = zeros(1,500)';
 gamma_0 = -1.4;
 alpha = 10;
-% need to fix this parameter maybe
-time = linspace(0, 500, 1000);
+time = linspace(0, 500, 500);
 C_D_change = {};
 C_D_change{1} = C_D;
 C_L_change = {};

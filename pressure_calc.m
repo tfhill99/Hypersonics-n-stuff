@@ -26,9 +26,9 @@ for j = 1:length(M1)
         sin_theta = sum((V(:,j).'.*N)/velocity(j)); 
         thetas(i) = asin(sin_theta); % make 3 rows
         if thetas(i) <= 0
-            Cps(i,j) = -2/(gamma * M1(j)^2);
+            Cps(i,j) = -2/(gamma * M1(j)^2); % Base pressure approximation
         else
-            Cps(i,j) = C_p0(j) * (sin(thetas(i)))^2;
+            Cps(i,j) = C_p0(j) * (sin(thetas(i)))^2; % Newtonian Theory
         end
     end
 end
