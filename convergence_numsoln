@@ -25,7 +25,8 @@ E = C_D/C_L;
 tspan = [0 500];
 
 y0 = [v_0 deg2rad(gamma_0) z_0];
-[t,y] = ode45(@(t,y) odefcn(t,y,beta, myode(t,y,k_d,kdt,E,Edt),g,R_E,rho_0), tspan, y0);
+opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
+[t,y] = ode45(@(t,y) odefcn(t,y,beta, myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)), tspan, y0);
         
 time = t;
 V = y(:,1); 
@@ -60,18 +61,13 @@ Mach = V./c_num;
 
 end
 %% Function
-function dydt = odefcn(~,y,beta,k_d,E,g,R_E,rho_0)
-  dydt = zeros(3,1);
-  dydt(1) = (-0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)/k_d - g*(1 - (y(1)^2)/(R_E*g*(1 + y(3)/R_E)))*sin(y(2));
-  dydt(2) = (0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)*E/k_d + (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
-  dydt(3) = y(1) * sin(y(2)); 
-end
-
-function dydt = myode(t,y,k_d,kdt,E,Edt)
-k_d = interp1(kdt,k_d,t); % Interpolate the data set (kd) at time t. 
-E = interp1(Edt,E,t); % Interpolate the data set (E) at time t. 
-dydt(1) = (-0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)/k_d - g*(1 - (y(1)^2)/(R_E*g*(1 + y(3)/R_E)))*sin(y(2));
-dydt(2) = (0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)*E/k_d + (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
+function dydt = myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)
+    k_d = interp1(kdt,k_d,t); % Interpolate the data set (kd) at time t. 
+    E = interp1(Edt,E,t); % Interpolate the data set (E) at time t. 
+    dydt = zeros(3,1);
+    dydt(1) = (-0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)/k_d - g*(1 - (y(1)^2)/(R_E*g*(1 + y(3)/R_E)))*sin(y(2));
+    dydt(2) = (0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)*E/k_d + (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
+    dydt(3) = y(1) * sin(y(2)); 
 end
 
 %% Atmosphere Function
