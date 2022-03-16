@@ -25,9 +25,9 @@ y0 = [v_0 deg2rad(gamma_0) z_0];
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
 [t,y] = ode45(@(t,y) myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0), tspan, y0);
      
-V = interp1(y(:,1),t,t0);
-gamma = interp1(y(:,2),t,t0);
-Z = interp1(y(:,3),t,t0);
+V = interp1(t, y(:,1),t0)';
+gamma = interp1(t, y(:,2),t0)';
+Z = interp1(t, y(:,3),t0)';
 time = t0;
 
 %% Mach
