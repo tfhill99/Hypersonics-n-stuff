@@ -32,15 +32,38 @@ time = t0';
 
 %% Mach
 [Z_total, Z_L, Z_U, T, P, rho, c, g_atmos, mu, nu, k, n, n_sum]  = atmo(120, 0.01, 1);
+% Outputs go from index(1) = sea level to index(12001) = 120,000m
 
-spacing = z_0/length(Z)/10; % as the atmo function returns every 10 m
+Z_L = flip(Z_L)*1000;
+c = flip(c);
+index = 0;
+% Find which of the numerical Z values are in range of atmos 86,000m 
+for i = 1:length(Z)
+   if Z(i) > Z_L(1)
+       index = index + 1;
+   end
+end
+Z_inlimit = Z(index+1:end);
+Z_extend = Z(1:index);
 
-c_trim = (transpose(c(spacing:spacing:end)));
-T_num = transpose(T(spacing:spacing:end));
-T_extend = T_num(length(c_trim)+1:end);
+% Interpolate the respective speed of sound values for numerical solution
+c_inlimit_interp = interp1(Z_L, c, Z_inlimit);
+
+% Find the temperatures for 86000 - 120000 km
+T_extend = T(length(Z_L):end);
+T_extend = flip(T_extend);
+
+% Extrapolate the speed of sound values from 86000-120000
 c_extend = sqrt(gamma_atmos*R*T_extend);
-c_num = flip(cat(2,c_trim,c_extend))';
 
+% Interpolate the respective speed of sounds values for numerical solution
+Z_U = flip(Z_U)*1000;
+c_extend_interp = interp1(Z_U, c_extend, Z_extend);
+
+% Combine the two for the speed of sound along the whole trajectory 
+c_num = cat(2,c_extend_interp,c_inlimit_interp);
+
+% Calculate Mach number for the whole trajectory
 Mach = V./c_num;
 end
 %% Function
