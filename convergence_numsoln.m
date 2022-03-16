@@ -58,7 +58,6 @@ c_extend = sqrt(gamma_atmos*R*T_extend);
 c_num = flip(cat(2,c_trim,c_extend));
 
 Mach = V./c_num;
-
 end
 %% Function
 function dydt = myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)
