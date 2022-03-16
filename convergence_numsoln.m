@@ -28,7 +28,7 @@ opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
 V = interp1(t, y(:,1),t0)';
 gamma = interp1(t, y(:,2),t0)';
 Z = interp1(t, y(:,3),t0)';
-time = t0;
+time = t0';
 
 %% Mach
 [Z_total, Z_L, Z_U, T, P, rho, c, g_atmos, mu, nu, k, n, n_sum]  = atmo(120, 0.01, 1);
