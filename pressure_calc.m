@@ -1,4 +1,4 @@
-function [C_D, C_L] = pressure_calc(M1, velocity, Z, alpha, plotting, density, pressure)
+function [C_D, C_L] = pressure_calc(M1, velocity, Z, alpha, plotting, density, pressure, file)
 % constants
 gamma = 1.4;
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
@@ -7,8 +7,7 @@ C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 %C_p0_limit =  (4/(gamma+1))*((gamma+1)^2/(4*gamma))^((gamma)/(gamma-1));
 
 % read the mesh and find the vectors
-name = 'CAD_capsule_3.stl'; 
-[TR, P, F] = read_mesh(name); 
+[TR, P, F] = read_mesh(file); 
 
 vx = velocity.*sin(alpha); 
 vy = 0; 
