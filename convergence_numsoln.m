@@ -1,15 +1,12 @@
 function [Mach, V, Z, time] = convergence_numsoln(C_D, C_L, time, gamma_0)
+
 %% Defining Constants
-clc; 
-clear;
 R_E = 6371.23 * 1000; %m
 g = 9.8066; %m/s^2
 rho_0 = 1.5; %kg/m^3
 beta = 1/6900; %m^-1
 mass = 40; %kg
-% S = 2402 * 1e-6; %m^2
 max_R = 765/1000; %m
-% k_d = mass./(S * C_D);
 R = 287; % J/kg*K
 gamma_atmos = 1.4; % constant for air
 S = pi * max_R * max_R; 
@@ -17,12 +14,12 @@ z_0 = 120 * 1000; %m
 v_0 = 7396.6; %m/s
 kdt = time;
 Edt = time;
+
 %% Diff Eq
-
 k_d = mass./(S*C_D);
-E = C_D/C_L;
+E = C_D./C_L;
 
-tspan = [0 500];
+tspan = [0 1000];
 
 y0 = [v_0 deg2rad(gamma_0) z_0];
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
