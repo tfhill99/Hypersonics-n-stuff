@@ -1,4 +1,4 @@
-function [Mach, V, Z, time] = convergence_numsoln(C_D, C_L, time, gamma_0)
+function [Mach, V, Z, time, rho, P] = convergence_numsoln(C_D, C_L, time, gamma_0)
 
 %% Defining Constants
 R_E = 6371.23 * 1000; %m

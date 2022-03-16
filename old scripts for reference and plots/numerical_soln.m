@@ -200,6 +200,7 @@ function dydt = odefcn(t,y,beta,k_d,g,R_E,rho_0)
   dydt(2) = (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
   dydt(3) = y(1) * sin(y(2)); 
 end
+
 %% Atmosphere Function
 function [Z, Z_L, Z_U, T, P, rho, c, g, mu, nu, k, n, n_sum] = atmo(alt,division,units)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
