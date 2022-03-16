@@ -22,7 +22,7 @@ tspan = [0 500];
 
 y0 = [v_0 deg2rad(gamma_0) z_0];
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
-[t,y] = ode45(@(t,y) odefcn(t,y,beta, myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)), tspan, y0);
+[t,y] = ode45(@(t,y) myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0), tspan, y0);
         
 time = t;
 V = y(:,1); 
@@ -51,7 +51,7 @@ c_trim = (transpose(c(spacing:spacing:end)));
 T_num = transpose(T(spacing:spacing:end));
 T_extend = T_num(length(c_trim)+1:end);
 c_extend = sqrt(gamma_atmos*R*T_extend);
-c_num = flip(cat(2,c_trim,c_extend));
+c_num = flip(cat(2,c_trim,c_extend))';
 
 Mach = V./c_num;
 end
