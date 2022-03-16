@@ -4,7 +4,6 @@ gamma = 1.4;
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
 Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
-%C_p0_limit =  (4/(gamma+1))*((gamma+1)^2/(4*gamma))^((gamma)/(gamma-1));
 
 % read the mesh and find the vectors
 [TR, P, F] = read_mesh(file); 
@@ -42,49 +41,6 @@ disp('ending cp calc')
 thetas = reshape(thetas, [length(thetas), 1]); 
 Cps = reshape(Cps, [length(Cps), length(M1)]); 
 
-%{
-% finding cps along the velocity vector line
-vect_indices_1 = find(P(:,2) > -5); % the y coordinate will be 0 in the x-z plane, where the velocity is applied
-vect_indices_2 = find(P(:,2) < 5); 
-[vect_indices, eh] = intersect(vect_indices_1, vect_indices_2); 
-
-cross_sec_cp = []; 
-cross_sec_X = [];
-
-enter_index = 1; 
-
-for j = 1:length(M1)
-    for i = 1:length(vect_indices)
-        k = vect_indices(i);
-        cross_sec_X(enter_index) = P(k, 1); 
-        disp('Im here')
-        cross_sec_cp(enter_index, j) = Cps(k, j); 
-        enter_index = enter_index + 1; 
-    end
-end
-
-cross_sec_cp = reshape(cross_sec_cp, [length(cross_sec_cp), length(M1)]);
-cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
-
-% write to csv
- D = [cross_sec_X cross_sec_cp]; 
- csvwrite('Cp_along_xzplane', D);
-
- if plotting == true
-    % Cps vs Mach
-    Cpps = Cps(1,:);
-     
-    figure(1)
-    axis([0 2 0 12000])
-    plot(M1, Cpps,'-.')
-    axis([0 12000 0 2])
-    legend(' ');
-    ylabel('Cp');
-    xlabel('Mach');
-    title('Cp vs Mach');
- end
-
-%}
 
  disp('starting other calc')
  % calculating pressure at each point for each mach

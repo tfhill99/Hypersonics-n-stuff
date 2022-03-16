@@ -61,10 +61,10 @@ Z_U = flip(Z_U)*1000;
 c_extend_interp = interp1(Z_U, c_extend, Z_extend);
 
 % Combine the two for the speed of sound along the whole trajectory 
-c_num = cat(2,c_extend_interp,c_inlimit_interp);
+c_combined = cat(1,c_extend_interp,c_inlimit_interp);
 
 % Calculate Mach number for the whole trajectory
-Mach = V./c_num;
+Mach = V./c_combined;
 end
 %% Function
 function dydt = myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)
