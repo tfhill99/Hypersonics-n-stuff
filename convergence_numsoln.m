@@ -65,6 +65,16 @@ c_combined = cat(1,c_extend_interp,c_inlimit_interp);
 
 % Calculate Mach number for the whole trajectory
 Mach = V./c_combined;
+
+%% Interpolate rho and P. Needed for pressure_calc function input
+
+% Ensure all variables are going from h --> 0
+rho = flip(rho);
+P = flip(P);
+Z_total = flip(Z_total)*1000; % Scale to m
+
+P = interp1(Z_total,P,Z);
+rho = interp1(Z_total,rho,Z);
 end
 %% Function
 function dydt = myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)

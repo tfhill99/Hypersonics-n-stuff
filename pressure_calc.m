@@ -1,6 +1,8 @@
 function [C_D, C_L] = pressure_calc(M1, velocity, Z, alpha, plotting, density, pressure, file)
 % constants
 gamma = 1.4;
+
+% nose pressure, contingent on shock theory and M1 dependance
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
 Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
@@ -41,13 +43,10 @@ disp('ending cp calc')
 thetas = reshape(thetas, [length(thetas), 1]); 
 Cps = reshape(Cps, [length(Cps), length(M1)]); 
 
-
  disp('starting other calc')
- % calculating pressure at each point for each mach
- rho = density(1:length(M1)); 
- size(density)
- size(rho)
- P = pressure(1:length(M1)); 
+ % already been interpolated in convergence_numsoln.m
+ rho = density;
+ P = pressure;
  pressures = [];
 
  [area, areas] = get_triangulation_area(TR); 
