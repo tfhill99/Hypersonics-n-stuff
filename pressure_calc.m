@@ -2,9 +2,9 @@ function [C_D, C_L] = pressure_calc(M1, velocity, Z, alpha, plotting, density, p
 % constants
 gamma = 1.4;
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
-Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^(7/2);
+Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
-C_p0_limit =  (4/(gamma+1))*((gamma+1)^2/(4*gamma))^((gamma)/(gamma-1));
+%C_p0_limit =  (4/(gamma+1))*((gamma+1)^2/(4*gamma))^((gamma)/(gamma-1));
 
 % read the mesh and find the vectors
 name = 'CAD_capsule_3.stl'; 
@@ -50,7 +50,7 @@ for j = 1:length(M1)
     for i = 1:length(vect_indices)
         k = vect_indices(i);
         cross_sec_X(enter_index) = P(k, 1); 
-        cross_sec_cp(enter_index, j) = Cp(k, j); 
+        cross_sec_cp(enter_index, j) = Cps(k, j); 
         enter_index = enter_index + 1; 
     end
 end
