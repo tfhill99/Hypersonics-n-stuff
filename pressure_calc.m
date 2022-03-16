@@ -80,7 +80,7 @@ cross_sec_X = reshape(cross_sec_X, [length(cross_sec_X), 1]);
  P = pressure(1:length(M1)); 
  pressures = [];
 
- [area, individual_areas] = get_triangulation_area(TR); 
+ [area, areas] = get_triangulation_area(TR); 
 
  for i = 1:length(M1)
      pressures(:,i) = Cps(:,i) * 0.5 * rho(i) * velocity(i)^2 + P(i); 
