@@ -138,6 +138,8 @@ acc_analytical{2} = -0.5/(k_d(2)*g)*V_analytical{2}.^2.*rho_analytical; % calcul
 
 acc_numerical = {};
 Z_plot = {};
+acc_max = {};
+Z_a_max = {};
 
 for i = 1:length(V)
     for j = 1:(length(V{i})-1)
@@ -145,7 +147,10 @@ for i = 1:length(V)
        Z_plot{i}(j) = (Z{i}(j)+Z{i}(j+1))/2;
     end
     acc_numerical{i} = acc_numerical{i}.';
+    [acc_max{i},index] = min(acc_numerical{i});
+    Z_a_max{i} = Z{i}(index);
 end
+
 
 figure(5)
 plot(acc_analytical{1}, Z_analytical, '-.'); 
