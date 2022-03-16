@@ -35,7 +35,6 @@ for j = 1:length(M1)
             Cps(i,j) = C_p0(j) * (sin(thetas(i)))^2; % Newtonian Theory
         end
     end
-    disp(j)
 end
 
 disp('ending cp calc')
@@ -75,7 +74,7 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
  max_R = 765/1000; %m
  reff_area = pi * max_R * max_R; 
 
- size(f_z)
+ %size(f_z)
 
  C_L = transpose(f_z) ./ (rho .* velocity.^2);  
  size(C_L)
