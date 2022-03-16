@@ -8,7 +8,7 @@ Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 
 % read the mesh and find the vectors
-[TR, P, F] = read_mesh(file); 
+[TR, ~, F] = read_mesh(file); 
 
 disp('loaded mesh')
 
@@ -48,12 +48,14 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
  P = pressure;
  pressures = [];
 
- [area, areas] = get_triangulation_area(TR); 
+ [~, areas] = get_triangulation_area(TR); 
 
  for i = 1:length(M1)
+     % Find the pressure for a given Cp (based off Cp definition)
      pressures(:,i) = Cps(:,i) * 0.5 * rho(i) * velocity(i)^2 + P(i); 
  end
 
+ % Force vectors
  f_z = []; 
  f_x = []; 
 
@@ -62,6 +64,7 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
      f_x_curr = 0; 
      for j = 1:length(F)
          normals = F(j,:); 
+         % find the normal in z and x direction i.e. index 3 and 1
          f_z_curr = f_z_curr + (-1 * pressures(j, i)) * normals(3) * areas(j); 
          f_x_curr = f_x_curr + (-1 * pressures(j, i)) * normals(1) * areas(j);
      end
@@ -74,10 +77,7 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
  max_R = 765/1000; %m
  reff_area = pi * max_R * max_R; 
 
- %size(f_z)
-
  C_L = transpose(f_z) ./ (rho .* velocity.^2);  
- size(C_L)
  C_L = C_L / (0.5 * reff_area); 
  C_D = transpose(f_x) ./ (rho .* velocity.^2);
  C_D = C_D / (0.5 * reff_area);
