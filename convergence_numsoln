@@ -60,7 +60,7 @@ Mach = V./c_num;
 
 end
 %% Function
-function dydt = odefcn(~,y,beta,k_d,g,R_E,rho_0)
+function dydt = odefcn(~,y,beta,k_d,E,g,R_E,rho_0)
   dydt = zeros(3,1);
   dydt(1) = (-0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)/k_d - g*(1 - (y(1)^2)/(R_E*g*(1 + y(3)/R_E)))*sin(y(2));
   dydt(2) = (0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)*E/k_d + (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
