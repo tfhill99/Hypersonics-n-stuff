@@ -15,10 +15,10 @@ kdt = time;
 Edt = time;
 
 %% Diff Eq
-k_d = mass./(S*C_D);
-E = C_D./C_L;
+k_d = (mass/S)./C_D;
+E = C_L./C_D;
 
-tspan = [0 1000];
+tspan = [0 500];
 
 y0 = [v_0 deg2rad(gamma_0) z_0];
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
