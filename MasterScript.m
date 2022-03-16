@@ -9,7 +9,7 @@ C_D_change{1} = C_D;
 C_L_change = {};
 C_L_change{1} = C_L;
 [M1, V, Z, time, rho, P] = convergence_numsoln(C_D, C_L, time, gamma_0);
-[C_D, C_L] = pressure_calc(M1, V, Z, alpha);
+[C_D, C_L] = pressure_calc(M1, V, Z, alpha, False, rho, P);
 C_D_change{2} = C_D;
 C_L_change{2} = C_L;
 
