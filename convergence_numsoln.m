@@ -12,18 +12,18 @@ S = pi * max_R * max_R;
 z_0 = 120 * 1000; %m
 v_0 = 7396.6; %m/s
 kdt = time;
-Edt = time;
+klt = time;
 
 %% Diff Eq
 k_d = (mass/S)./C_D;
-E = C_L./C_D;
+k_l = (mass/S)./C_L;
 
 tspan = [0 500];
 t0 = linspace(0,500,500);
 
 y0 = [v_0 deg2rad(gamma_0) z_0];
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
-[t,y] = ode45(@(t,y) myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0), tspan, y0);
+[t,y] = ode45(@(t,y) myode(t,y,k_d,kdt,k_l,klt,beta,g,R_E,rho_0), tspan, y0);
      
 V = interp1(t, y(:,1),t0)';
 gamma = interp1(t, y(:,2),t0)';
@@ -77,12 +77,12 @@ P = interp1(Z_total,P,Z);
 rho = interp1(Z_total,rho,Z);
 end
 %% Function
-function dydt = myode(t,y,k_d,kdt,E,Edt,beta,g,R_E,rho_0)
+function dydt = myode(t,y,k_d,kdt,k_l,klt,beta,g,R_E,rho_0)
     k_d = interp1(kdt,k_d,t); % Interpolate the data set (kd) at time t. 
-    E = interp1(Edt,E,t); % Interpolate the data set (E) at time t. 
+    k_l = interp1(klt,k_l,t); % Interpolate the data set (kl) at time t. 
     dydt = zeros(3,1);
     dydt(1) = (-0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)/k_d - g*(1 - (y(1)^2)/(R_E*g*(1 + y(3)/R_E)))*sin(y(2));
-    dydt(2) = (0.5*rho_0*exp(-1*beta*y(3)) * y(1)^2)*E/k_d + (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
+    dydt(2) = (0.5*rho_0*exp(-1*beta*y(3)) * y(1))/k_l + (-1*g*(1 - (y(1)^2)/(R_E*g*(1+y(3)/R_E)))*cos(y(2)))/y(1);
     dydt(3) = y(1) * sin(y(2)); 
 end
 
