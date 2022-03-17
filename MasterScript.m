@@ -3,7 +3,7 @@ clear;
 
 % Angle of attack and entry angle
 gamma_0 = -1.4;
-alpha = 0; %degrees
+alpha = 20; %degrees
 
 % Initial ballistic C_D and C_L
 C_D = 1.4*ones(1,500)';
@@ -100,13 +100,15 @@ title('Converged C_D versus Mach for AoA = 0');
 
 % Altitude, Velocity, Mach, Acceleration, Temperature, Density
 
+total = length(M1);
+increment = cast(total/7, "uint8");
 
-Z_table = [Z(1), Z(35), Z(70), Z(105), Z(140), Z(175), Z(210), Z(235)].';
-v_table = [V(1), V(35), V(70), V(105), V(140), V(175), V(210), V(235)].';
-M_table = [M1(1), M1(35), M1(70), M1(105), M1(140), M1(175), M1(210), M1(235)].';
-acc_table = [Accel(1), Accel(35), Accel(70), Accel(105), Accel(140), Accel(175), Accel(210), Accel(235)].';
-t_table = [T(1), T(35), T(70), T(105), T(140), T(175), T(210), T(235)].';
-rho_table = [rho(1), rho(35), rho(70), rho(105), rho(140), rho(175), rho(210), rho(235)].';
-C_d_table = [C_D_final(1), C_D_final(35), C_D_final(70), C_D_final(105), C_D_final(140), C_D_final(175), C_D_final(210), C_D_final(235)].';
-
-table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table)
+Z_table = [Z(1), Z(1+increment), Z(1+2*increment), Z(1+3*increment), Z(1+4*increment), Z(1+5*increment), Z(1+6*increment), Z(total)].';
+v_table = [V(1), V(1+increment), V(1+2*increment), V(1+3*increment), V(1+4*increment), V(1+5*increment), V(1+6*increment), V(total)].';
+M_table = [M1(1), M1(1+increment), M1(1+2*increment), M1(1+3*increment), M1(1+4*increment), M1(1+5*increment), M1(1+6*increment), M1(total)].';
+acc_table = [Accel(1), Accel(1+increment), Accel(1+2*increment), Accel(1+3*increment), Accel(1+4*increment), Accel(1+5*increment), Accel(1+6*increment), Accel(total)].';
+t_table = [T(1), T(1+increment), T(1+2*increment), T(1+3*increment), T(1+4*increment), T(1+5*increment), T(1+6*increment), T(total)].';
+rho_table = [rho(1), rho(1+increment), rho(1+2*increment), rho(1+3*increment), rho(1+4*increment), rho(1+5*increment), rho(1+6*increment), rho(total)].';
+C_d_table = [C_D_final(1), C_D_final(1+increment), C_D_final(1+2*increment), C_D_final(1+3*increment), C_D_final(1+4*increment), C_D_final(1+5*increment), C_D_final(1+6*increment), C_D_final(total)].';
+C_l_table = [C_L_final(1), C_L_final(1+increment), C_L_final(1+2*increment), rho(1+3*increment), C_L_final(1+4*increment), C_L_final(1+5*increment), C_L_final(1+6*increment), C_L_final(total)].';
+table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table, C_l_table)
