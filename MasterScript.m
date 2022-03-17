@@ -1,13 +1,13 @@
 clc; 
 clear;
 
+% Angle of attack and entry angle
+gamma_0 = -1.4;
+alpha = 0; %degrees
+
 % Initial ballistic C_D and C_L
 C_D = 1.4*ones(1,500)';
 C_L = zeros(1,500)';
-
-% Angle of attack and entry angle
-gamma_0 = -1.4;
-alpha = 0;
 time = linspace(0, 500, 500)';
 
 % Arrays for tracking C_D and C_L convergence
@@ -82,6 +82,18 @@ C_D_final = C_D_change{i};
 C_D_final = C_D_final(1:clip_index); 
 
 C_L_final = C_L_change{i}; 
-C_L_final = C_L_final(1:clip_index); 
+C_L_final = C_L_final(1:clip_index);
+
+M1 = M1(1:clip_index);
+disp('done')
+
+%% Plotting Final Trajectory
+
+figure(1)
+set(gcf,'color','w');
+plot(M1, C_D_final);
+xlabel('Mach Number');
+ylabel('C_d');
+title('Converged C_D versus Mach for AoA = 0');
 
 

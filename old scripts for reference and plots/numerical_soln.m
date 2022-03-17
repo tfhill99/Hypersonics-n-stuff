@@ -151,7 +151,6 @@ for i = 1:length(V)
     Z_a_max{i} = Z{i}(index);
 end
 
-
 figure(5)
 set(gcf,'color','w');
 plot(acc_analytical{1}/g, Z_analytical, '-.'); 
@@ -165,6 +164,9 @@ xlabel('Normalized Acceleration');
 ylabel('Altitude (m)');
 title('Flight Path Comparison with \gamma_0 = -1.4 degrees'); 
 legend('Analytical C_D = 0.8', 'Analytical C_D = 1.4', 'Numerical C_D = 0.8', 'Numerical C_D = 1.4');
+
+figure(6)
+
 
 %% Calculating Mach
 c_trim = (transpose(c(spacing:spacing:end)));
