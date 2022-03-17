@@ -12,6 +12,9 @@ C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 % read the mesh and find the vectors
 [TR, ~, F] = read_mesh(file); 
 
+csvwrite('Triangulation Points', TR.Points); 
+csvwrite('Triangulation Connections', TR.ConnectivityList); 
+
 disp('loaded mesh')
 
 vx = velocity.*sin(alpha); 
@@ -33,7 +36,6 @@ for j = 1:length(M1)
         thetas(i) = asin(sin_theta); % make 3 rows
         if thetas(i) <= 0
             Cps(i,j) = 0; % Base pressure approximation
-           
             if N(3) < 0
                 Cps(i,j) = -2/(gamma * M1(j)^2);
             end
