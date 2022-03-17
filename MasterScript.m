@@ -111,4 +111,4 @@ t_table = [T(1), T(1+increment), T(1+2*increment), T(1+3*increment), T(1+4*incre
 rho_table = [rho(1), rho(1+increment), rho(1+2*increment), rho(1+3*increment), rho(1+4*increment), rho(1+5*increment), rho(1+6*increment), rho(total)].';
 C_d_table = [C_D_final(1), C_D_final(1+increment), C_D_final(1+2*increment), C_D_final(1+3*increment), C_D_final(1+4*increment), C_D_final(1+5*increment), C_D_final(1+6*increment), C_D_final(total)].';
 C_l_table = [C_L_final(1), C_L_final(1+increment), C_L_final(1+2*increment), rho(1+3*increment), C_L_final(1+4*increment), C_L_final(1+5*increment), C_L_final(1+6*increment), C_L_final(total)].';
-table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table, C_l_table)
+table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table, C_l_table);
