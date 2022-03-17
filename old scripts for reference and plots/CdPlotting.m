@@ -47,3 +47,23 @@ disp(k)
 k = k+1;
 end
 
+%% Plotting
+figure(1)
+for i = 1:length(alpha_iter)
+    plot(M_plot{i}, C_D_plot{i});
+    hold on; 
+end
+legend('\alpha = 0', '\alpha = 5', '\alpha = 10', '\alpha = 15', '\alpha = 20');
+xlabel('Mach Number');
+ylabel('Drag Coefficient');
+title('Flight Path');
+
+figure(2)
+for i = 1:length(alpha_iter)
+    plot(M_plot{i}, C_L_plot{i});
+    hold on; 
+end
+legend('\alpha = 0', '\alpha = 5', '\alpha = 10', '\alpha = 15', '\alpha = 20');
+xlabel('Mach Number');
+ylabel('Lift Coefficient');
+title('Flight Path');
