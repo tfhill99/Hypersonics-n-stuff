@@ -109,4 +109,4 @@ t_table = [T(1), T(35), T(70), T(105), T(140), T(175), T(210), T(235)].';
 rho_table = [rho(1), rho(35), rho(70), rho(105), rho(140), rho(175), rho(210), rho(235)].';
 C_d_table = [C_D_final(1), C_D_final(35), C_D_final(70), C_D_final(105), C_D_final(140), C_D_final(175), C_D_final(210), C_D_final(235)].';
 
-table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table);
+table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table)
