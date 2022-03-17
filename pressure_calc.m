@@ -55,7 +55,7 @@ disp('ending cp calc')
 
  for i = 1:length(M1)
      % Find the pressure for a given Cp (based off Cp definition)
-     pressures(:,i) = Cps(:,i) * 0.5 * rho(i) * velocity(i)^2; 
+     pressures(:,i) = Cps(:,i) * 0.5 * rho(i) * velocity(i)^2 + P(i); 
  end
 
  % Force vectors

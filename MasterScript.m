@@ -78,5 +78,10 @@ while any(A - B > 0.05)
     B = B(1:clip_index); 
 end
 
+C_D_final = C_D_change{i}; 
+C_D_final = C_D_final(1:clip_index); 
+
+C_L_final = C_L_change{i}; 
+C_L_final = C_L_final(1:clip_index); 
 
 
