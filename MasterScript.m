@@ -21,7 +21,7 @@ plotting = false;
 file = 'CAD_capsule_3.stl';
 
 disp('Solving Diff Eq'); 
-[M1, V, time, rho, P] = convergence_numsoln(C_D, C_L, time, gamma_0);
+[M1, V, Z, time, rho, P, T, A] = convergence_numsoln(C_D, C_L, time, gamma_0);
 
 % clipping Mach number
 clip_index = length(M1); 
@@ -54,7 +54,7 @@ B = B(1:clip_index);
 
 while any(A - B > 0.05)
     disp('Solving Diff Eq'); 
-    [M1, V, time, rho, P] = convergence_numsoln(C_D, C_L, time, gamma_0);
+    [M1, V, Z, time, rho, P, T, A] = convergence_numsoln(C_D, C_L, time, gamma_0);
 
     % clipping Mach number
     
@@ -95,5 +95,10 @@ plot(M1, C_D_final);
 xlabel('Mach Number');
 ylabel('C_d');
 title('Converged C_D versus Mach for AoA = 0');
+
+%% Test Matrix
+
+% Altitude, Velocity, Mach, Acceleration, Temperature, Density
+
 
 

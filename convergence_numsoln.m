@@ -1,4 +1,4 @@
-function [Mach, V, time, rho, P] = convergence_numsoln(C_D, C_L, time, gamma_0)
+function [Mach, V, Z, time, rho, P, T, A] = convergence_numsoln(C_D, C_L, time, gamma_0)
 %% Defining Constants
 R_E = 6371.23 * 1000; %m
 g = 9.8066; %m/s^2
@@ -66,15 +66,26 @@ c_combined = cat(1,c_extend_interp,c_inlimit_interp);
 % Calculate Mach number for the whole trajectory
 Mach = V./c_combined;
 
-%% Interpolate rho and P. Needed for pressure_calc function input
+%% Interpolate rho and P and T. Needed for pressure_calc function input and final test matrix
 
 % Ensure all variables are going from h --> 0
 rho = flip(rho);
 P = flip(P);
+T = flip(T);
 Z_total = flip(Z_total)*1000; % Scale to m
 
 P = interp1(Z_total,P,Z);
 rho = interp1(Z_total,rho,Z);
+T = interp1(Z_total, T, Z);
+
+%% Calculate Acceleration. Needed for final test matrix
+
+A = {};
+for j = 1:(length(V)-1)
+   A(j) = (V(j)-V(j+1))/(time(j)-time(j+1));
+end
+A = A.';
+
 end
 %% Function
 function dydt = myode(t,y,k_d,kdt,k_l,klt,beta,g,R_E,rho_0)
