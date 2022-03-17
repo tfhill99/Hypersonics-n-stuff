@@ -1,4 +1,4 @@
-function [C_D, C_L, pressures, areas, f_z, f_x] = pressure_calc(M1, velocity, alpha, plotting, density, pressure, file)
+function [C_D, C_L, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, velocity, alpha, plotting, density, pressure, file)
 % constants
 gamma = 1.4;
 
@@ -39,8 +39,9 @@ end
 
 disp('ending cp calc')
 
-thetas = reshape(thetas, [length(thetas), 1]); 
-Cps = reshape(Cps, [length(Cps), length(M1)]); 
+%thetas = reshape(thetas, [length(thetas), 1]); 
+%Cps = reshape(Cps, [length(Cps), length(M1)]); 
+
 
  disp('starting pressure calc')
  % already been interpolated in convergence_numsoln.m
@@ -54,7 +55,7 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
 
  for i = 1:length(M1)
      % Find the pressure for a given Cp (based off Cp definition)
-     pressures(:,i) = Cps(:,i) * 0.5 * rho(i) * velocity(i)^2 + P(i); 
+     pressures(:,i) = Cps(:,i) * 0.5 * rho(i) * velocity(i)^2; 
  end
 
  % Force vectors
@@ -67,8 +68,8 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
      for j = 1:length(F)
          normals = F(j,:); 
          % find the normal in z and x direction i.e. index 3 and 1
-         f_z_curr = f_z_curr - (pressures(j, i)) * normals(3) * areas(j); 
-         f_x_curr = f_x_curr - (pressures(j, i)) * normals(1) * areas(j);
+         f_z_curr = f_z_curr + (pressures(j, i)) * normals(3) * areas(j); 
+         f_x_curr = f_x_curr + (pressures(j, i)) * normals(1) * areas(j);
      end
      f_z(i) = f_z_curr; 
      f_x(i) = f_x_curr; 
@@ -76,12 +77,17 @@ Cps = reshape(Cps, [length(Cps), length(M1)]);
 
  disp('ending other calc')
 
+D = f_z * cos(alpha) - f_x * sin(alpha); 
+L = f_z * sin(alpha) + f_x * cos(alpha); 
+
  max_R = 765/1000; %m
  reff_area = pi * max_R * max_R; 
 
- C_D = transpose(f_z) ./ (rho .* velocity.^2);  
+ rho = density;
+
+ C_D = transpose(D) ./ (rho .* velocity.^2);  
  C_D = C_D / (0.5 * reff_area); 
- C_L = transpose(f_x) ./ (rho .* velocity.^2);
+ C_L = transpose(L) ./ (rho .* velocity.^2);
  C_L = C_L / (0.5 * reff_area);
 
 end
