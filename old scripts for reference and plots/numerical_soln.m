@@ -153,14 +153,15 @@ end
 
 
 figure(5)
-plot(acc_analytical{1}, Z_analytical, '-.'); 
+set(gcf,'color','w');
+plot(acc_analytical{1}/g, Z_analytical, '-.'); 
 hold on; 
-plot(acc_analytical{2}, Z_analytical, '--')
+plot(acc_analytical{2}/g, Z_analytical, '--')
 hold on;
-plot(acc_numerical{1}, Z_plot{1}, '-o'); 
+plot(acc_numerical{1}/g, Z_plot{1}, '-o'); 
 hold on;
-plot(acc_numerical{2}, Z_plot{2}, '--o'); 
-xlabel('Acceleration (m/s^2)');
+plot(acc_numerical{2}/g, Z_plot{2}, '--o'); 
+xlabel('Normalized Acceleration');
 ylabel('Altitude (m)');
 title('Flight Path Comparison with \gamma_0 = -1.4 degrees'); 
 legend('Analytical C_D = 0.8', 'Analytical C_D = 1.4', 'Numerical C_D = 0.8', 'Numerical C_D = 1.4');
