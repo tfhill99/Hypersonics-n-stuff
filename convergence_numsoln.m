@@ -90,7 +90,8 @@ A = A.';
 h = 562.32; %m
 V_clip = V(128:end);
 rho_clip = rho(128:end);
-mu_interp = interp1(Z_L, mu, Z_inlimit);
+Z_clip = Z(128:end);
+mu_interp = interp1(Z_L, mu, Z_clip);
 
 Re = h*V_clip.*rho_clip./mu_interp;
 end
