@@ -1,6 +1,8 @@
-function [C_D, C_L, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, velocity, alpha, plotting, density, pressure, file)
+function [C_D, C_L, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, velocity, alpha_init, plotting, density, pressure, file)
 % constants
 gamma = 1.4;
+
+alpha = deg2rad(alpha_init); 
 
 % nose pressure, contingent on shock theory and M1 dependance
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
@@ -30,7 +32,12 @@ for j = 1:length(M1)
         sin_theta = sum((V(:,j).'.*N)/velocity(j)); 
         thetas(i) = asin(sin_theta); % make 3 rows
         if thetas(i) <= 0
-            Cps(i,j) = -2/(gamma * M1(j)^2); % Base pressure approximation
+            Cps(i,j) = 0; % Base pressure approximation
+           
+            if N(3) < 0
+                Cps(i,j) = -2/(gamma * M1(j)^2);
+            end
+            
         else
             Cps(i,j) = C_p0(j) * (sin(thetas(i)))^2; % Newtonian Theory
         end
@@ -68,8 +75,8 @@ disp('ending cp calc')
      for j = 1:length(F)
          normals = F(j,:); 
          % find the normal in z and x direction i.e. index 3 and 1
-         f_z_curr = f_z_curr + (pressures(j, i)) * normals(3) * areas(j); 
-         f_x_curr = f_x_curr + (pressures(j, i)) * normals(1) * areas(j);
+         f_z_curr = f_z_curr - (pressures(j, i)) * normals(3) * areas(j); 
+         f_x_curr = f_x_curr - (pressures(j, i)) * normals(1) * areas(j);
      end
      f_z(i) = f_z_curr; 
      f_x(i) = f_x_curr; 
@@ -78,7 +85,9 @@ disp('ending cp calc')
  disp('ending other calc')
 
 D = f_z * cos(alpha) - f_x * sin(alpha); 
-L = f_z * sin(alpha) + f_x * cos(alpha); 
+L = f_z * sin(alpha) + f_x * cos(alpha);  
+
+D = -1 * D; 
 
  max_R = 765/1000; %m
  reff_area = pi * max_R * max_R; 
