@@ -82,7 +82,7 @@ T = interp1(Z_total, T, Z);
 
 A = {};
 for j = 1:(length(V)-1)
-   A(j) = (V(j)-V(j+1))/(time(j)-time(j+1));
+   A{j} = (V(j)-V(j+1))/(time(j)-time(j+1));
 end
 A = A.';
 

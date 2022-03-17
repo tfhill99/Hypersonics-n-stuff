@@ -100,5 +100,12 @@ title('Converged C_D versus Mach for AoA = 0');
 
 % Altitude, Velocity, Mach, Acceleration, Temperature, Density
 
+Z_table = [Z(1), Z(50), Z(100), Z(150), Z(200), Z(250), Z(300), Z(350), Z(400), Z(450), Z(500)].';
+v_table = [Z(1), Z(50), Z(100), Z(150), Z(200), Z(250), Z(300), Z(350), Z(400), Z(450), Z(500)].';
+M_table = [Z(1), Z(50), Z(100), Z(150), Z(200), Z(250), Z(300), Z(350), Z(400), Z(450), Z(500)].';
+acc_table = [Z(1), Z(50), Z(100), Z(150), Z(200), Z(250), Z(300), Z(350), Z(400), Z(450), Z(500)].';
+t_table = [T(1), T(50), T(100), T(150), T(200), T(250), T(300), T(350), T(400), T(450), T(500)].';
+rho_table = [rho(1),rho(50),rho(100),rho(150),rho(200),rho(250),rho(300),rho(350),rho(400),rho(450),rho(500)].';
 
+table(Z_table,v_table,M_table,acc_table,t_table,rho_table);
 
