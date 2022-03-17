@@ -1,4 +1,4 @@
-function [Mach, V, Z, time, rho, P, T, A] = convergence_numsoln(C_D, C_L, time, gamma_0)
+function [Mach, V, Z, time, rho, P, T, A, Re] = convergence_numsoln(C_D, C_L, time, gamma_0)
 %% Defining Constants
 R_E = 6371.23 * 1000; %m
 g = 9.8066; %m/s^2
@@ -86,6 +86,13 @@ for j = 1:(length(V)-1)
 end
 A = A.';
 
+%% Calculate Reynolds Number
+h = 562.32; %m
+V_clip = V(128:end);
+rho_clip = rho(128:end);
+mu_interp = interp1(Z_L, mu, Z_inlimit);
+
+Re = h*V_clip.*rho_clip./mu_interp;
 end
 %% Function
 function dydt = myode(t,y,k_d,kdt,k_l,klt,beta,g,R_E,rho_0)

@@ -199,7 +199,6 @@ z_table = [Z_analytical(1),Z_analytical(100),Z_analytical(200),Z_analytical(300)
 acc_table = [acc_analytical{1}(1),acc_analytical{1}(100),acc_analytical{1}(200),acc_analytical{1}(300),acc_analytical{1}(400),acc_analytical{1}(500),acc_analytical{1}(600),acc_analytical{1}(700),acc_analytical{1}(800),acc_analytical{1}(900),acc_analytical{1}(1000)].';
 
 table(v_table,t_table,rho_table,M_table,z_table,acc_table);
-
 %% Function
 % Use V, gamma, z
 function dydt = odefcn(t,y,beta,k_d,g,R_E,rho_0)
