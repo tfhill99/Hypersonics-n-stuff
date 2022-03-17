@@ -46,9 +46,10 @@ M_plot{k} = M1;
 disp(k)
 k = k+1;
 end
-
+disp('done')
 %% Plotting
 figure(1)
+set(gcf,'color','w');
 for i = 1:length(alpha_iter)
     plot(M_plot{i}, C_D_plot{i});
     hold on; 
@@ -59,6 +60,7 @@ ylabel('Drag Coefficient');
 title('Flight Path');
 
 figure(2)
+set(gcf,'color','w');
 for i = 1:length(alpha_iter)
     plot(M_plot{i}, C_L_plot{i});
     hold on; 
