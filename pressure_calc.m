@@ -10,7 +10,7 @@ Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 
 % read the mesh and find the vectors
-[TR, ~, F] = read_mesh(file); 
+[TR, Centers, F] = read_mesh(file); 
 
 csvwrite('Triangulation Points', TR.Points); 
 csvwrite('Triangulation Connections', TR.ConnectivityList); 
@@ -70,18 +70,27 @@ disp('ending cp calc')
  % Force vectors
  f_z = []; 
  f_x = []; 
+ M = [];
+ Centers_X = Centers(1);
+ Centers_Z = Centers(3);
+ cg_x = 5;
+ cg_z = 5;
+
 
  for i = 1:length(M1)
      f_z_curr = 0; 
      f_x_curr = 0; 
+     M = 0;
      for j = 1:length(F)
          normals = F(j,:); 
+         M = M (- (Centers_X(i)-cg_x)*- (pressures(j, i)) * normals(3) + -(Centers_Z(i)-cg_z)*- (pressures(j, i)) * normals(1));
          % find the normal in z and x direction i.e. index 3 and 1
          f_z_curr = f_z_curr - (pressures(j, i)) * normals(3) * areas(j); 
          f_x_curr = f_x_curr - (pressures(j, i)) * normals(1) * areas(j);
      end
      f_z(i) = f_z_curr; 
      f_x(i) = f_x_curr; 
+     M(i) = M;
  end
 
  disp('ending other calc')
