@@ -71,8 +71,8 @@ disp('ending cp calc')
  f_z = []; 
  f_x = []; 
  M = [];
- Centers_X = Centers(1);
- Centers_Z = Centers(3);
+ Centers_X = Centers(:,1);
+ Centers_Z = Centers(:,3);
  cg_x = 5;
  cg_z = 5;
 
