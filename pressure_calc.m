@@ -40,7 +40,6 @@ for j = 1:length(M1)
         if thetas(i) <= 0
             Cps(i,j) = 0; % Base pressure approximation
             if N(3) < 0
-                shadow = j;
                 Cps(i,j) = -2/(gamma * M1(j)^2);
                 Cps_base(i, j) = -2/(gamma * M1(j)^2);
             end
@@ -80,6 +79,10 @@ disp('ending cp calc')
  % Force vectors
  f_z = []; 
  f_x = []; 
+ f_z_nosecone = [];
+ f_x_nosecone = [];
+ f_z_base = [];
+ f_x_base = [];
  M = [];
  Centers_X = Centers(:,1);
  Centers_Z = Centers(:,3);
@@ -95,24 +98,28 @@ disp('ending cp calc')
      f_z_curr_base = 0; 
      f_x_curr_base = 0;
      My = 0;
+
      for j = 1:length(F)
          normals = F(j,:); 
          My = (- (Centers_X(i)-cg_x)*- (pressures(j, i)) * normals(3) + -(Centers_Z(i)-cg_z)*- (pressures(j, i)) * normals(1));
          % find the normal in z and x direction i.e. index 3 and 1
          f_z_curr = f_z_curr - (pressures(j, i)) * normals(3) * areas(j); 
          f_x_curr = f_x_curr - (pressures(j, i)) * normals(1) * areas(j);
-         f_z_curr_nosecone = f_z_curr_nosecone - (pressures(j, i)) * normals(3) * areas(j); 
-         f_x_curr_nosecone = f_x_curr_nosecone - (pressures(j, i)) * normals(1) * areas(j);
-         f_z_curr_base = f_z_curr_base - (pressures(j, i)) * normals(3) * areas(j); 
-         f_x_curr_base = f_x_curr_base - (pressures(j, i)) * normals(1) * areas(j);
+         f_z_curr_nosecone = f_z_curr_nosecone - (pressures_nosecone(j, i)) * normals(3) * areas(j); 
+         % f_x_curr_nosecone = f_x_curr_nosecone - (pressures_nosecone(j, i)) * normals(1) * areas(j);
+         % error in mesh with Normal = 0, causes CL = CL_noscone
+         f_z_curr_base = f_z_curr_base - (pressures_base(j, i)) * normals(3) * areas(j); 
+         f_x_curr_base = f_x_curr_base - (pressures_base(j, i)) * normals(1) * areas(j);
+         %error fix with below line
+         f_x_curr_nosecone = f_x_curr - f_x_curr_base;
          
      end
      f_z(i) = f_z_curr; 
      f_x(i) = f_x_curr;
-     f_z_nosecone(i) = f_z_curr; 
-     f_x_nosecone(i) = f_x_curr; 
-     f_z_base(i) = f_z_curr; 
-     f_x_base(i) = f_x_curr; 
+     f_z_nosecone(i) = f_z_curr_nosecone; 
+     f_x_nosecone(i) = f_x_curr_nosecone; 
+     f_z_base(i) = f_z_curr_base; 
+     f_x_base(i) = f_x_curr_base; 
      My(i) = My;
  end
 
