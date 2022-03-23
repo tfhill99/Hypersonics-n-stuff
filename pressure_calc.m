@@ -26,7 +26,7 @@ V(2,:) = vy;
 V(3,:) = vz;
 thetas = []; 
 Cps = [];
-Cps_nosecone = [];
+Cps_nosecone = zeros(16348, 500);
 Cps_base = zeros(16348, 500);
 
 disp('starting cp calc')
@@ -66,7 +66,7 @@ disp('ending cp calc')
  pressures_base = [];
 
  [~, areas] = get_triangulation_area(TR); 
-
+ 
  areas = areas / 1e6; 
 
  for i = 1:length(M1)
@@ -83,35 +83,42 @@ disp('ending cp calc')
  f_x_nosecone = [];
  f_z_base = [];
  f_x_base = [];
- M = [];
+ Mys = [];
+ Mys_nosecone = [];
+ Mys_base = [];
  Centers_X = Centers(:,1);
  Centers_Z = Centers(:,3);
- cg_x = 765/1000;
- cg_z = 5/10;
-
+ Centers_X = Centers_X/1000;
+ Centers_Z = Centers_Z/1000;
+ cg_x = 0;
+ cg_z = 0.2809269856; %measurement from CAD
 
  for i = 1:length(M1)
      f_z_curr = 0; 
      f_x_curr = 0;
+     My_curr = 0;
      f_z_curr_nosecone = 0; 
      f_x_curr_nosecone = 0;
+     My_curr_nosecone = 0;
      f_z_curr_base = 0; 
      f_x_curr_base = 0;
-     My = 0;
-
+     My_curr_base = 0;
+     
      for j = 1:length(F)
-         normals = F(j,:); 
-         My = (- (Centers_X(i)-cg_x)*- (pressures(j, i)) * normals(3) + -(Centers_Z(i)-cg_z)*- (pressures(j, i)) * normals(1));
          % find the normal in z and x direction i.e. index 3 and 1
+         normals = F(j,:); 
+         My_curr = My_curr - (- (Centers_X(j)-cg_x)* (-pressures(j, i) * normals(3)) + (Centers_Z(j)-cg_z)* (-pressures(j, i))* normals(1)) * areas(j);
+         My_curr_nosecone = My_curr_nosecone - (- (Centers_X(j)-cg_x)* (-pressures_nosecone(j, i) * normals(3)) + (Centers_Z(j)-cg_z)* (-pressures_nosecone(j, i)) * normals(1)) * areas(j);
+         My_curr_base = My_curr_base - (- (Centers_X(j)-cg_x)* (-pressures_base(j, i) * normals(3)) + (Centers_Z(j)-cg_z)* (-pressures_base(j, i)) * normals(1)) * areas(j);
          f_z_curr = f_z_curr - (pressures(j, i)) * normals(3) * areas(j); 
          f_x_curr = f_x_curr - (pressures(j, i)) * normals(1) * areas(j);
          f_z_curr_nosecone = f_z_curr_nosecone - (pressures_nosecone(j, i)) * normals(3) * areas(j); 
-         % f_x_curr_nosecone = f_x_curr_nosecone - (pressures_nosecone(j, i)) * normals(1) * areas(j);
+         f_x_curr_nosecone = f_x_curr_nosecone - (pressures_nosecone(j, i)) * normals(1) * areas(j);
          % error in mesh with Normal = 0, causes CL = CL_noscone
          f_z_curr_base = f_z_curr_base - (pressures_base(j, i)) * normals(3) * areas(j); 
          f_x_curr_base = f_x_curr_base - (pressures_base(j, i)) * normals(1) * areas(j);
          %error fix with below line
-         f_x_curr_nosecone = f_x_curr - f_x_curr_base;
+         %f_x_curr_nosecone = f_x_curr - f_x_curr_base;
          
      end
      f_z(i) = f_z_curr; 
@@ -120,7 +127,9 @@ disp('ending cp calc')
      f_x_nosecone(i) = f_x_curr_nosecone; 
      f_z_base(i) = f_z_curr_base; 
      f_x_base(i) = f_x_curr_base; 
-     My(i) = My;
+     Mys(i) = My_curr;
+     Mys_nosecone(i) = My_curr_nosecone;
+     Mys_base(i) = My_curr_base;
  end
 
  disp('ending other calc')
@@ -130,7 +139,7 @@ L = f_z * sin(alpha) + f_x * cos(alpha);
 D_nosecone = f_z_nosecone * cos(alpha) - f_x_nosecone * sin(alpha); 
 L_nosecone = f_z_nosecone * sin(alpha) + f_x_nosecone * cos(alpha);  
 D_base = f_z_base * cos(alpha) - f_x_base * sin(alpha); 
-L_base = f_z_base * sin(alpha) + f_x_base * cos(alpha);  
+L_base = f_z_base * sin(alpha) + f_x_base * cos(alpha);
 
 D = -1 * D;
 D_nosecone = -1 * D_nosecone;
@@ -138,6 +147,8 @@ D_base = -1 * D_base;
 
  max_R = 765/1000; %m
  reff_area = pi * max_R * max_R; 
+
+ lref = 0.43 * 2 * max_R;
 
  rho = density;
 
@@ -153,7 +164,15 @@ D_base = -1 * D_base;
  C_L_nosecone = C_L_nosecone / (0.5 * reff_area);
  C_L_base = transpose(L_base) ./ (rho .* velocity.^2);
  C_L_base = C_L_base / (0.5 * reff_area);
+ C_M = transpose(Mys)./(rho .* velocity.^2);
+ C_M = C_M / (0.5 * lref * reff_area);
+ C_M_nosecone = transpose(Mys_nosecone)./(rho .* velocity.^2);
+ C_M_nosecone = C_M_nosecone/ (0.5 * lref * reff_area);
+ C_M_base= transpose(Mys_base)./(rho .* velocity.^2);
+ C_M_base = C_M_base / (0.5 * lref * reff_area);
+
+%D = [C_L C_L_nosecone C_L_base C_D C_D_nosecone C_D_base C_M C_M_nosecone C_M_base];
+%name = "CL_CLnosecone_CLbase_CD_CDnosecone_CDbase_CM_CMnosecone_CMbase_at_" + 0; 
+%csvwrite(name, D); 
 
 end
-
-
