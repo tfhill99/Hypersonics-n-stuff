@@ -91,7 +91,7 @@ disp('ending cp calc')
  Centers_X = Centers_X/1000;
  Centers_Z = Centers_Z/1000;
  cg_x = 0;
- cg_z = 0.2809269856; %measurement from CAD
+ cg_z = 0.2809269856; % measurement from CAD
 
  for i = 1:length(M1)
      f_z_curr = 0; 
