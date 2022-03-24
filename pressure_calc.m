@@ -1,4 +1,4 @@
-function [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, velocity, alpha_init, plotting, density, pressure, file)
+function [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps, C_p0] = pressure_calc(M1, velocity, alpha_init, plotting, density, pressure, file)
 % constants
 gamma = 1.4;
 
