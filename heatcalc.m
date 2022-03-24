@@ -40,18 +40,18 @@ xlabel('Altitude (m)')
 ylabel('Velocity (m/s)')
 legend('Velocity')
 
-%% Find Cp along the Flight Path
-
-alpha_init = rad2deg(alpha_r(1));
-plotting = false;
-file = 'CAD_capsule_3.stl';
-
-[C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps, C_p0] = pressure_calc(Mach, V, alpha_init, plotting, rho, P, file);
+%% Find Cp_0 along the Flight Path
+gamma = gamma_atmos;
+M1 = Mach;
+% nose pressure, contingent on shock theory and M1 dependance
+P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
+Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
+C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 
 %% Calculate Stagnation Pressure along Flight Path
 
 R_n = 0.272; %m
-c_p = 1.00; % kJ/kg
+% c_p = 1.00; % kJ/kg
 N = 0.5;
 M = 3;
 r = 0.71^0.5; %laminar flow where 0.71 is Prandtl as r = Pr^n
@@ -62,7 +62,7 @@ for i = 1:5
     % Fix wall temperature
     T_w = T_e(i);
     % Tauber Menees
-    T_aw = T_w + r*V.^2/(2*c_p);
+    T_aw = T_w + r*V.^2./(2*C_p0);
     C = 1.29*10^-4*R_n^-0.5*(1-T_w/T_aw);
     q_w{i} = C*rho_traj.^N.*V.^M;
 end
