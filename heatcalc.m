@@ -62,7 +62,8 @@ for i = 1:5
     % Fix wall temperature
     T_w = T_e(i);
     % Tauber Menees
-    T_aw = T_w + r*V.^2./(2*C_p0);
+    % T_aw = T_traj + r*V.^2./(2*C_p0);
+    T_aw = 100000;
     C = 1.29*10^-4*R_n^-0.5*(1-T_w/T_aw);
     q_w{i} = C*rho_traj.^N.*V.^M;
 end
