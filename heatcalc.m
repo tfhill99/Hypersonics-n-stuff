@@ -117,15 +117,15 @@ ylabel('q_w (W/cm^2)')
 legend('800','900','1000','1100','1200')
 
 %% Sutton and Graves Stagnation Heat Exchange
-q_w_c = (1.1415*10^-4).*(rho_traj.^(1/2)).*V.^3./R_n^(1/2)/10000;
+q_w_c = (1.1415*10^-4).*(rho_traj.^(1/2)).*V.^3./R_n^(1/2)/10000; %/10000
 epsilon =  0.9;
 K1 = 372.6;
 K2 = 8.5;
 K3 = 1.6;
-q_w_r_stag = (R_n*K1*((3.28084*10^-4).*V).^K2).*((rho_traj./1.22499915588771).^K3);
-T_w_sutgrav = ((q_w_c + q_w_r_stag)/(epsilon*sigma)).^0.25;
-q_r_wall = epsilon*sigma*T_w_sutgrav.^4;
-q_w_cond = q_w_c + q_w_r_stag - q_r_wall;
+q_w_r_stag = (R_n*K1*((3.28084*10^-4).*V).^K2).*((rho_traj./1.22499915588771).^K3)*10000;
+T_w_sutgrav = (((q_w_c + q_w_r_stag)/(epsilon*sigma)).^0.25);
+q_r_wall = (epsilon*sigma*T_w_sutgrav.^4);
+q_w_cond = ((q_w_c + q_w_r_stag - q_r_wall));
 
 figure(4)
 plot(q_w_c, Z)
@@ -149,7 +149,7 @@ S = 0.3437976; %estimate
 r = 0.71^0.5; %laminar flow
 A = 0.664; % (8.53.1)
 m = 0.5;
-T_aw = T_traj.*(1 + r*((gamma_atmos - 1)/2).*Mach.^2);
+T_aw = T_traj.*(1 + r.*((gamma_atmos - 1)/2).*Mach.^2);
 T2_Ttraj = ((2*gamma_atmos * (gamma_atmos - 1))/(gamma_atmos + 1)^2).*Mach;
 Ttraj_T2 = T2_Ttraj.^-1;
 T2 = T2_Ttraj.*T_traj;
@@ -158,11 +158,11 @@ T_w = T2.*((Ttraj_T2 - 0.16*r*((gamma_atmos - 1)/2).*M2.^2 - 1))/0.55;
 theta_wedge = pi/4; % unsure about this angle
 
 C_sph = (4.03*10^-9)*(cos(theta_wedge)^0.5)*sin(theta_wedge)*(S^(-0.5)).*(1-T_w./T_aw);
-%C_sph = sum of C_sph
 q_w_nosecone = C_sph.*rho_traj.^N.*V.^M;
+q_w_phi = q_w_nosecone;
 
 figure(5)
 plot(q_w_nosecone, Z)
 title('Heat Exchange on Nosecone along the Trajectory')
-xlabel('qw_noscone (W/cm^2)')
+xlabel('qwnoscone (W/cm^2)')
 ylabel('Altitude (m)')
