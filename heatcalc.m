@@ -40,6 +40,12 @@ xlabel('Altitude (m)')
 ylabel('Velocity (m/s)')
 legend('Velocity')
 
+figure(2)
+plot(Z, Mach)
+title('Mach v/s Altitude (Optimized Flight Path')
+xlabel('Mach')
+ylabel('Altitude (m)')
+
 %% Find Cp_0 along the Flight Path
 gamma = gamma_atmos;
 M1 = Mach;
