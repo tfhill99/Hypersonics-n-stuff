@@ -172,3 +172,13 @@ plot(q_w_nosecone, Z)
 title('Heat Exchange on Nosecone along the Trajectory')
 xlabel('qwnoscone (W/cm^2)')
 ylabel('Altitude (m)')
+
+%% Cp calc along flight path
+% M1 = M1(1:9918, 1);
+% velocity = velocity(1:9918, 1);
+% pressure = pressure(1:9918, 1);
+% density = density(1:9918, 1);
+% plotting = 0;
+% alph_init = 0;
+% file = 'CAD_capsule_3.stl';
+% [Cps] = pressure_calc(M1, V, alpha_init, plotting, rho_traj, pressure, file)
