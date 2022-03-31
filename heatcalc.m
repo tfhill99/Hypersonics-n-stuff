@@ -11,6 +11,7 @@ X = traj(3:end,5);
 Z = traj(3:end,6);
 theta_r = traj(3:end,7);
 gamma_r = traj(3:end,8);
+
 %% Calculate Mach, Rho, P_inf along traj
 % First need T from atmo function
 gamma_atmos = 1.4;
@@ -35,8 +36,8 @@ Mach = V./c_traj;
 figure(1)
 plot(Z, V)
 title('Velocity v/s Altitude (Optimized Flight Path)')
-xlabel('Altitude (m)')
-ylabel('Velocity (m/s)')
+xlabel('Velocity (m/s)')
+ylabel('Altitude (m)')
 legend('Velocity')
 
 figure(2)
@@ -53,12 +54,12 @@ P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
 Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 
-%% Calculate Stagnation Heating along Flight Path
+%% Calculate Stagnation Pressure along Flight Path
 
-R_n = 0.272; % Nose Radius in m 
+R_n = 0.272; %m
 % c_p = 1.00; % kJ/kg
-N = 0.5; % Tauber Menees Coefficient
-M = 3;  % Tauber Menees Coefficient
+N = 0.5;
+M = 3;
 r = 0.71^0.5; %laminar flow where 0.71 is Prandtl as r = Pr^n
 T_e = [100 500 1000 1500 2000]; %K
 q_w = {};
@@ -67,9 +68,9 @@ for i = 1:5
     % Fix wall temperature
     T_w = T_e(i);
     % Tauber Menees
-    T_aw = T_traj + r*V.^2./(2*C_p0);
-    % T_aw = 100000;
-    C = 1.29*10^-4*R_n^-0.5*(1-T_w/T_aw);
+    % T_aw = T_traj + r*V.^2./(2*C_p0);
+    T_aw = 100000;
+    C = (1.83*10^-8)*R_n^-0.5*(1-T_w/T_aw)*10000;
     q_w{i} = C*rho_traj.^N.*V.^M;
 end
 
@@ -94,35 +95,36 @@ end
 
 %% Plotting q_w and q_total
 
-figure(2)
+figure(3)
 plot(Z, q_w{1})
 hold on
 plot(Z, q_total{1})
 title('Stagnation Flux along Trajectory, T_w = 800 K')
-xlabel('Altitude (m)')
-ylabel('q_w (W/cm^2)')
+xlabel('q_w (W/cm^2)')
+ylabel('Altitude (m)')
 legend('Without Blackbody Radiation','With Blackbody Radiation')
 
 %% Plotting q_total across T
 
-figure(3)
-plot(Z, q_total{1})
+figure(4)
+plot(q_total{1}, Z)
 hold on
-plot(Z, q_total{2})
+plot(q_total{2}, Z)
 hold on
-plot(Z, q_total{3})
+plot(q_total{3}, Z)
 hold on
-plot(Z, q_total{4})
+plot(q_total{4}, Z)
 hold on
-plot(Z, q_total{5})
-hold on
+plot(q_total{5}, Z)
+hold off
+
 title('Stagnation Flux at Various Temperatures along Trajectory')
-xlabel('Altitude (m)')
-ylabel('q_w (W/cm^2)')
+xlabel('q_w (W/cm^2)')
+ylabel('Altitude (m)')
 legend('800','900','1000','1100','1200')
 
 %% Sutton and Graves Stagnation Heat Exchange
-q_w_c = (1.1415*10^-4).*(rho_traj.^(1/2)).*V.^3./R_n^(1/2)/10000; %/10000
+q_w_c = (1.1415*10^-4).*(rho_traj.^(1/2)).*V.^3./R_n^(1/2)/10000;
 epsilon =  0.9;
 K1 = 372.6;
 K2 = 8.5;
@@ -130,54 +132,70 @@ K3 = 1.6;
 q_w_r_stag = (R_n*K1*((3.28084*10^-4).*V).^K2).*((rho_traj./1.22499915588771).^K3)*10000;
 T_w_sutgrav = (((q_w_c + q_w_r_stag)/(epsilon*sigma)).^0.25);
 q_r_wall = (epsilon*sigma*T_w_sutgrav.^4);
-q_w_cond = ((q_w_c + q_w_r_stag - q_r_wall));
+%q_w_cond = ((q_w_c + q_w_r_stag - q_r_wall));
+q_w_cond = 0; %assumption
 
-figure(4)
+figure(5)
 plot(q_w_c, Z)
 hold on
 plot(q_w_r_stag, Z)
 plot(q_r_wall, Z)
-plot(q_w_cond, Z)
+%plot(q_w_cond, Z)
 hold off
 title('Heat Exchange at Stagnation Point along the Trajectory')
 xlabel('qs (W/cm^2)')
 ylabel('Altitude (m)')
 legend('qc', 'qr', 'qwall', 'qcond')
 
-%% Tauber-Menees Heat Rate Along Nose Curve
+%% Tauber-Menees Heat Rate Along Body
 N = 0.5;
 M = 3.2;
 % used CAD for measurements
 r_cone_1 = 0.270356; %m
 r_cone_2 = 0.0692;
-S = 0.3437976; %estimate
+S_nose = 0.3437976; %estimate
+S_cone = 0.698695; %m rest of S after 
 r = 0.71^0.5; %laminar flow
 A = 0.664; % (8.53.1)
 m = 0.5;
-T_aw = T_traj.*(1 + r.*((gamma_atmos - 1)/2).*Mach.^2);
-T2_Ttraj = ((2*gamma_atmos * (gamma_atmos - 1))/(gamma_atmos + 1)^2).*Mach;
-Ttraj_T2 = T2_Ttraj.^-1;
-T2 = T2_Ttraj.*T_traj;
-M2 = ((((gamma_atmos - 1)*Mach.^2 + 2))./(2*gamma_atmos.*Mach.^2-(gamma_atmos - 1))).^0.5;
-T_w = T2.*((Ttraj_T2 - 0.16*r*((gamma_atmos - 1)/2).*M2.^2 - 1))/0.55;
-theta_wedge = pi/4; % unsure about this angle
 
-C_sph = (4.03*10^-9)*(cos(theta_wedge)^0.5)*sin(theta_wedge)*(S^(-0.5)).*(1-T_w./T_aw);
-q_w_nosecone = C_sph.*rho_traj.^N.*V.^M;
-q_w_phi = q_w_nosecone;
+%solve for Taw and Tw
+%T_aw = T_traj.*(1 + r.*((gamma_atmos - 1)/2).*Mach.^2);
+T_aw = T_traj + r*V.^2./(2*C_p0);
+%T_aw = 100000;
+%T2_Ttraj = ((2*gamma_atmos * (gamma_atmos - 1))/(gamma_atmos + 1)^2).*Mach;
+%Ttraj_T2 = T2_Ttraj.^-1;
+% T2 = T2_Ttraj.*T_traj;
+% M2 = ((((gamma_atmos - 1)*Mach.^2 + 2))./(2*gamma_atmos.*Mach.^2-(gamma_atmos - 1))).^0.5;
+%T_w = T2.*((Ttraj_T2 - 0.16*r*((gamma_atmos - 1)/2).*M2.^2 - 1))/0.55;
+%T_w = [100 500 1000 1500 2000]; %K
+T_w = 1000;
+theta_wedge = pi/4;
 
-figure(5)
-plot(q_w_nosecone, Z)
-title('Heat Exchange on Nosecone along the Trajectory')
-xlabel('qwnoscone (W/cm^2)')
+% discretizing S along the cone
+S_cone_inc = [];
+for i = 1:200
+    S_cone_inc(i) = S_nose + i*S_cone/200;
+end
+
+C_cyl = [];
+for i = 1:length(S_cone_inc)
+    for j = 1:length(rho_traj)
+        C_cyl(j,i) = (2.42*10^-9)*(cos(theta_wedge)^0.5)*sin(theta_wedge)*(S_cone_inc(i)^(-0.5)).*(1-T_w./T_aw(j));
+    end
+end
+
+q_w_cone = [];
+for i = 1:length(S_cone_inc)
+    for j = 1:length(rho_traj)
+        q_w_cone(j,i) =  (C_cyl(j,i)*10)*rho_traj(j)^N*V(j)^M /10000;
+        
+    end
+end
+q_w_cones = sum(q_w_cone, 2); % getting total q on cone
+
+figure(6)
+plot(q_w_cones(1:12000), Z(1:12000))
+title('Heat Exchange on Cone along the Trajectory')
+xlabel('qwcone (W/cm^2)')
 ylabel('Altitude (m)')
-
-%% Cp calc along flight path
-% M1 = M1(1:9918, 1);
-% velocity = velocity(1:9918, 1);
-% pressure = pressure(1:9918, 1);
-% density = density(1:9918, 1);
-% plotting = 0;
-% alph_init = 0;
-% file = 'CAD_capsule_3.stl';
-% [Cps] = pressure_calc(M1, V, alpha_init, plotting, rho_traj, pressure, file)
