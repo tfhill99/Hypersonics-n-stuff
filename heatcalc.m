@@ -11,7 +11,6 @@ X = traj(3:end,5);
 Z = traj(3:end,6);
 theta_r = traj(3:end,7);
 gamma_r = traj(3:end,8);
-
 %% Calculate Mach, Rho, P_inf along traj
 % First need T from atmo function
 gamma_atmos = 1.4;
@@ -54,12 +53,12 @@ P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
 Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
 C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 
-%% Calculate Stagnation Pressure along Flight Path
+%% Calculate Stagnation Heating along Flight Path
 
-R_n = 0.272; %m
+R_n = 0.272; % Nose Radius in m 
 % c_p = 1.00; % kJ/kg
-N = 0.5;
-M = 3;
+N = 0.5; % Tauber Menees Coefficient
+M = 3;  % Tauber Menees Coefficient
 r = 0.71^0.5; %laminar flow where 0.71 is Prandtl as r = Pr^n
 T_e = [100 500 1000 1500 2000]; %K
 q_w = {};
@@ -68,8 +67,8 @@ for i = 1:5
     % Fix wall temperature
     T_w = T_e(i);
     % Tauber Menees
-    % T_aw = T_traj + r*V.^2./(2*C_p0);
-    T_aw = 100000;
+    T_aw = T_traj + r*V.^2./(2*C_p0);
+    % T_aw = 100000;
     C = 1.29*10^-4*R_n^-0.5*(1-T_w/T_aw);
     q_w{i} = C*rho_traj.^N.*V.^M;
 end
