@@ -10,7 +10,7 @@ for i = 1:length(connections)
     p2 = vertices(2,:); 
     p3 = vertices(3,:); 
 
-    curr_area = 0.6 * 0.5 * norm(cross(p2-p1, p3-p1)); 
+    curr_area = 0.5 * norm(cross(p2-p1, p3-p1)); 
     areas(i) = curr_area; 
     area = area + curr_area;
 end
