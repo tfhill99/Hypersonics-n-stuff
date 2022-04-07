@@ -19,7 +19,7 @@ density = density(1:20:9918);
 plotting = 0;
 alpha = 0;
 file = 'CAD_capsule_3.stl';
-TR = stlread(file);
+%TR = stlread(file);
 
 %% nose pressure, contingent on shock theory and M1 dependance
 P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
@@ -34,6 +34,10 @@ csvwrite('Triangulation Points', TR.Points);
 csvwrite('Triangulation Connections', TR.ConnectivityList); 
 
 disp('loaded mesh')
+
+%TR = TR(1:8174, :);
+Centers = Centers(1:8174, :);
+F = F(1:8174, :);
 
 vx = velocity.*sin(alpha); 
 vy = 0; 
@@ -192,20 +196,30 @@ D_base = -1 * D_base;
  C_M_base = C_M_base / (0.5 * lref * reff_area);
 
  %% confirm base contribution for Drag
- basetot = [];
- for i = 1:length(M1)
-     count_base = 0;
-     base = 0;
-     for j = 1:length(F)
-         if Cps_base(j, i) ~= 0
-             count_base = count_base + 1;
-             base = base + Cps_base(j, i);
-         end
-     end
-     basetot(i) = base/count_base;
- end
- C_D_base_check= -1 * basetot(:) * 1.8385; % multiplied by base area
-
+%  basetot = [];
+%  for i = 1:length(M1)
+%      count_base = 0;
+%      base = 0;
+%      for j = 1:length(F)
+%          if Cps_base(j, i) ~= 0
+%              count_base = count_base + 1;
+%              base = base + Cps_base(j, i);
+%          end
+%      end
+%      basetot(i) = base/count_base;
+%  end
+%  C_D_base_check= -1 * basetot(:) * 1.8385; % multiplied by base area
+basetot = [];
+for i = 1:length(M1)
+    base = 0;
+    for j = 1:length(F)
+        if F(j,3) == -1
+            base = base + Cps_base(j, i)*areas(1,j);
+        end
+    end
+    basetot(i) = base;
+end
+C_D_base_check = -1 * basetot;
  
  %% confirm nose+cone contribution of drag using C_A at AOA = 0 
  count_nosecone = 0;
