@@ -31,30 +31,14 @@ file = 'CAD_capsule_3.stl';
 
 count = 1;
 
-pressures_save = {}; 
-Cps_save = {}; 
+% pressures_save = {}; 
+% Cps_save = {}; 
 
 for u = 1:length(alpha_iter)
+    
 alpha = alpha_iter(u); 
 disp('Solving Diff Eq'); 
 [M1, V, Z, time, rho, P, T, Accel, Re] = convergence_numsoln(C_D, C_L, time, gamma_0);
-
-% clipping Mach number
-clip_index = length(M1); 
-for i = 1:length(M1)
-    if M1(i) < 2
-        clip_index = i-1; 
-        break
-    end
-end
-
-%{
-M1 = M1(1:clip_index); 
-V = V(1:clip_index); 
-time = time(1:clip_index); 
-rho = rho(1:clip_index); 
-P = P(1:clip_index); 
-%}
 
 disp('Calculating Coefficients')
 [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, V, alpha, plotting, rho, P, file);
@@ -64,10 +48,10 @@ C_M_change{2} = C_M;
 
 i = 2; 
 
-A = C_D_change{i}; 
-B = C_D_change{i-1}; 
-A = A(1:clip_index); 
-B = B(1:clip_index); 
+A = C_D_change{i}(1:clip_index); 
+B = C_D_change{i-1}(1:clip_index); 
+%A = A(1:clip_index-1); 
+%B = B(1:clip_index-1); 
 
 while any(A - B > 0.05)
     disp('Solving Diff Eq'); 
@@ -82,11 +66,17 @@ while any(A - B > 0.05)
             break
         end
     end
+    
+    M1 = M1(1:clip_index); 
+    V = V(1:clip_index); 
+    time = time(1:clip_index); 
+    rho = rho(1:clip_index); 
+    P = P(1:clip_index);
 
     disp('Calculating Coefficients')
     [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, V, alpha, plotting, rho, P, file);
-    pressures_save{u} = pressures; 
-    Cps_save{u} = Cps; 
+    %pressures_save{u} = pressures; 
+    %Cps_save{u} = Cps; 
     C_D_change{i+1} = C_D;
     C_L_change{i+1} = C_L;
     C_M_change{i+1} = C_M;
@@ -94,8 +84,8 @@ while any(A - B > 0.05)
     disp(i)
     A = C_D_change{i}; 
     B = C_D_change{i-1};
-    A = A(1:clip_index); 
-    B = B(1:clip_index); 
+    %A = A(1:clip_index-1); 
+    %B = B(1:clip_index-1); 
 end
 
 C_D_final = C_D_change{i}; 
@@ -107,17 +97,16 @@ C_L_final = C_L_final(1:clip_index);
 C_M_final = C_M_change{i};
 C_M_final = C_M_final(1:clip_index);
 
-C = pressures_save{u}; 
-C = C(:, 1:clip_index); 
-pressures_save{u} = C; 
+%C = pressures_save{u}; 
+%C = C(:, 1:clip_index); 
+%pressures_save{u} = C; 
 
-C = Cps_save{u}; 
-C = C(:, 1:clip_index); 
-Cps_save{u} = C; 
+%C = Cps_save{u}; 
+%C = C(:, 1:clip_index); 
+%Cps_save{u} = C; 
 
-M1 = M1(1:clip_index);
+M1 = M1(1:clip_index-1);
 disp('done')
-
 
 C_D_plot{count} = C_D_final;
 C_L_plot{count} = C_L_final;

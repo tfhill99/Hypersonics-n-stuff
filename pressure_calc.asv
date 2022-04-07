@@ -10,8 +10,8 @@ end
 
 M1 = M1(1:clip_index); 
 velocity = velocity(1:clip_index);  
-density = density(1:clip_index); 
-pressure = pressure(1:clip_index); 
+rho = rho(1:clip_index); 
+P = P(1:clip_index); 
 
 gamma = 1.4;
 
