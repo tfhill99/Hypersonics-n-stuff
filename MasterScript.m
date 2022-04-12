@@ -48,30 +48,14 @@ C_M_change{2} = C_M;
 
 i = 2; 
 
-A = C_D_change{i}(1:clip_index); 
-B = C_D_change{i-1}(1:clip_index); 
-%A = A(1:clip_index-1); 
-%B = B(1:clip_index-1); 
+A = C_D_change{i};
+B = C_D_change{i-1};
+A = A(1:clip_index-1); 
+B = B(1:clip_index-1); 
 
 while any(A - B > 0.05)
     disp('Solving Diff Eq'); 
     [M1, V, Z, time, rho, P, T, A, Re] = convergence_numsoln(C_D, C_L, time, gamma_0);
-
-    % clipping Mach number
-    
-    clip_index = length(M1); 
-    for j = 1:length(M1)
-        if M1(j) < 2
-            clip_index = j-1; 
-            break
-        end
-    end
-    
-    M1 = M1(1:clip_index); 
-    V = V(1:clip_index); 
-    time = time(1:clip_index); 
-    rho = rho(1:clip_index); 
-    P = P(1:clip_index);
 
     disp('Calculating Coefficients')
     [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, V, alpha, plotting, rho, P, file);
@@ -84,8 +68,8 @@ while any(A - B > 0.05)
     disp(i)
     A = C_D_change{i}; 
     B = C_D_change{i-1};
-    %A = A(1:clip_index-1); 
-    %B = B(1:clip_index-1); 
+    A = A(1:clip_index-1); 
+    B = B(1:clip_index-1); 
 end
 
 C_D_final = C_D_change{i}; 
