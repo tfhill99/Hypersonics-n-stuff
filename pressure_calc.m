@@ -1,18 +1,5 @@
 function [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps, C_p0] = pressure_calc(M1, velocity, alpha_init, plotting, density, pressure, file)
 % constants
-clip_index = length(M1); 
-for i = 1:length(M1)
-    if M1(i) < 2
-        clip_index = i-1; 
-        break
-    end
-end
-
-M1 = M1(1:clip_index); 
-velocity = velocity(1:clip_index);  
-density = density(1:clip_index); 
-pressure = pressure(1:clip_index); 
-
 gamma = 1.4;
 
 alpha = deg2rad(alpha_init); 

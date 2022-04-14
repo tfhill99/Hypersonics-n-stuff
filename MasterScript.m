@@ -40,46 +40,81 @@ alpha = alpha_iter(u);
 disp('Solving Diff Eq'); 
 [M1, V, Z, time, rho, P, T, Accel, Re] = convergence_numsoln(C_D, C_L, time, gamma_0);
 
+clip_index = length(M1); 
+for i = 1:length(M1)
+    if M1(i) < 2
+        clip_index = i-1; 
+        break
+    end
+end
+
+M1 = M1(1:clip_index); 
+V = V(1:clip_index);  
+rho = rho(1:clip_index); 
+P = P(1:clip_index); 
+time = time(1:clip_index); 
+
 disp('Calculating Coefficients')
 [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, V, alpha, plotting, rho, P, file);
+
 C_D_change{2} = C_D;
 C_L_change{2} = C_L;
 C_M_change{2} = C_M;
 
-i = 2; 
+k = 2; 
 
-A = C_D_change{i};
-B = C_D_change{i-1};
-A = A(1:clip_index-1); 
-B = B(1:clip_index-1); 
+A = C_D_change{k};
+B = C_D_change{k-1};
+A_clip = A(1:clip_index-1); 
+B_clip = B(1:clip_index-1); 
 
-while any(A - B > 0.05)
+while any(A_clip - B_clip > 0.05)
     disp('Solving Diff Eq'); 
     [M1, V, Z, time, rho, P, T, A, Re] = convergence_numsoln(C_D, C_L, time, gamma_0);
+    
+    clip_index = length(M1); 
+    for i = 1:length(M1)
+        if M1(i) < 2
+            clip_index = i-1; 
+            break
+        end
+    end
+
+    M1 = M1(1:clip_index); 
+    V = V(1:clip_index);  
+    rho = rho(1:clip_index); 
+    P = P(1:clip_index); 
+    time = time(1:clip_index);
 
     disp('Calculating Coefficients')
     [C_D, C_L, C_M, pressures, areas, f_z, f_x, Cps] = pressure_calc(M1, V, alpha, plotting, rho, P, file);
     %pressures_save{u} = pressures; 
     %Cps_save{u} = Cps; 
-    C_D_change{i+1} = C_D;
-    C_L_change{i+1} = C_L;
-    C_M_change{i+1} = C_M;
-    i = i + 1;
-    disp(i)
-    A = C_D_change{i}; 
-    B = C_D_change{i-1};
-    A = A(1:clip_index-1); 
-    B = B(1:clip_index-1); 
+    C_D_change{k+1} = C_D;
+    C_L_change{k+1} = C_L;
+    C_M_change{k+1} = C_M;
+    k = k + 1;
+    disp(k)
+    if k == 3
+        B_clip = B;
+    else
+        B_clip = C_D_change{k-1};
+    end
+    A_clip = C_D_change{k}; 
+    
+    disp(clip_index)
+    disp(length(B_clip))
+    disp(length(A_clip))
 end
 
-C_D_final = C_D_change{i}; 
-C_D_final = C_D_final(1:clip_index); 
+C_D_final = C_D_change{k}; 
+%C_D_final = C_D_final(1:clip_index); 
 
-C_L_final = C_L_change{i}; 
-C_L_final = C_L_final(1:clip_index);
+C_L_final = C_L_change{k}; 
+%C_L_final = C_L_final(1:clip_index);
 
-C_M_final = C_M_change{i};
-C_M_final = C_M_final(1:clip_index);
+C_M_final = C_M_change{k};
+%C_M_final = C_M_final(1:clip_index);
 
 %C = pressures_save{u}; 
 %C = C(:, 1:clip_index); 
@@ -89,7 +124,7 @@ C_M_final = C_M_final(1:clip_index);
 %C = C(:, 1:clip_index); 
 %Cps_save{u} = C; 
 
-M1 = M1(1:clip_index-1);
+%M1 = M1(1:clip_index-1);
 disp('done')
 
 C_D_plot{count} = C_D_final;
