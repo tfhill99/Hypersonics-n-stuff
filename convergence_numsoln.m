@@ -19,7 +19,7 @@ k_d = (mass/S)./C_D;
 k_l = (mass/S)./C_L;
 
 tspan = [0 500];
-t0 = linspace(0,500,500);
+t0 = linspace(0, 300, 300);
 
 y0 = [v_0 deg2rad(gamma_0) z_0];
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
@@ -29,6 +29,7 @@ V = interp1(t, y(:,1),t0)';
 gamma = interp1(t, y(:,2),t0)';
 Z = interp1(t, y(:,3),t0)';
 time = t0';
+
 
 %% Mach
 [Z_total, Z_L, Z_U, T, P, rho, c, g_atmos, mu, nu, k, n, n_sum]  = atmo(120, 0.01, 1);
@@ -49,6 +50,7 @@ Z_extend = Z(1:index);
 % Interpolate the respective speed of sound values for numerical solution
 c_inlimit_interp = interp1(Z_L, c, Z_inlimit);
 
+
 % Find the temperatures for 86000 - 120000 km
 T_extend = T(length(Z_L):end);
 T_extend = flip(T_extend);
@@ -64,7 +66,7 @@ c_extend_interp = interp1(Z_U, c_extend, Z_extend);
 c_combined = cat(1,c_extend_interp,c_inlimit_interp);
 
 % Calculate Mach number for the whole trajectory
-Mach = V./c_combined;
+Mach = (V./c_combined);
 
 %% Interpolate rho and P and T. Needed for pressure_calc function input and final test matrix
 

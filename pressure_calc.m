@@ -65,7 +65,7 @@ disp('ending cp calc')
 
  [~, areas] = get_triangulation_area(TR); 
  
- areas = areas / 1e6; 
+ areas = areas / 2e6; 
 
  for i = 1:length(M1)
      % Find the pressure for a given Cp (based off Cp definition)
