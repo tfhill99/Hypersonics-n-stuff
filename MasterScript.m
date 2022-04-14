@@ -3,7 +3,7 @@ clear;
 
 % Angle of attack and entry angle
 gamma_0 = -1.4;
-alpha_iter = [0 5 10 15 20]; %degrees
+alpha_iter = [0]; %degrees
 
 % Initial ballistic C_D and C_L
 C_D = 1.4*ones(1,500)';
@@ -147,20 +147,25 @@ title('Converged C_D versus Mach for AoA = 0');
 %% Test Matrix
 
 % Altitude, Velocity, Mach, Acceleration, Temperature, Density
-
-total = length(M1);
+idx = 0;
+for i = 1:length(M1)
+    if ~isnan(M1(i))
+        idx = idx+1;
+    end
+end
+total = idx;
 increment = cast(total/7, "uint8");
 
 Z_table = [Z(1), Z(1+increment), Z(1+2*increment), Z(1+3*increment), Z(1+4*increment), Z(1+5*increment), Z(1+6*increment), Z(total)].';
 v_table = [V(1), V(1+increment), V(1+2*increment), V(1+3*increment), V(1+4*increment), V(1+5*increment), V(1+6*increment), V(total)].';
 M_table = [M1(1), M1(1+increment), M1(1+2*increment), M1(1+3*increment), M1(1+4*increment), M1(1+5*increment), M1(1+6*increment), M1(total)].';
-acc_table = [Accel(1), Accel(1+increment), Accel(1+2*increment), Accel(1+3*increment), Accel(1+4*increment), Accel(1+5*increment), Accel(1+6*increment), Accel(total)].';
+acc_table = [Accel(1), Accel(1+increment), Accel(1+2*increment), Accel(1+3*increment), Accel(1+4*increment), Accel(1+5*increment), Accel(1+6*increment), Accel(total-1)].';
 t_table = [T(1), T(1+increment), T(1+2*increment), T(1+3*increment), T(1+4*increment), T(1+5*increment), T(1+6*increment), T(total)].';
 rho_table = [rho(1), rho(1+increment), rho(1+2*increment), rho(1+3*increment), rho(1+4*increment), rho(1+5*increment), rho(1+6*increment), rho(total)].';
 C_d_table = [C_D_final(1), C_D_final(1+increment), C_D_final(1+2*increment), C_D_final(1+3*increment), C_D_final(1+4*increment), C_D_final(1+5*increment), C_D_final(1+6*increment), C_D_final(total)].';
 C_l_table = [C_L_final(1), C_L_final(1+increment), C_L_final(1+2*increment), C_L_final(1+3*increment), C_L_final(1+4*increment), C_L_final(1+5*increment), C_L_final(1+6*increment), C_L_final(total)].';
 C_m_table = [C_M_final(1), C_M_final(1+increment), C_M_final(1+2*increment), C_M_final(1+3*increment), C_M_final(1+4*increment), C_M_final(1+5*increment), C_M_final(1+6*increment), C_M_final(total)].';
-table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table, C_l_table, C_m_table);
+table(Z_table,v_table,M_table,acc_table,t_table,rho_table, C_d_table, C_l_table, C_m_table)
 
 %% Plotting
 figure(1)
