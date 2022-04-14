@@ -29,19 +29,28 @@ rho_traj = interp1(Z_total, rho, Z);
 c_traj = sqrt(gamma_atmos*R_atmos*T_traj);
 
 Mach = V./c_traj;
+%% Calculate Dynamic Pressure
+Dynamic_Pressure = 0.5 * rho_traj.* V.^2;
+%% Calculate Load Factor
+acc = zeros((length(V)-1),1);
+Z_acc = zeros((length(V)-1),1);
+for j = 1:(length(V)-1)
+   acc(j) = (V(j)-V(j+1))/(time(j)-time(j+1));
+   Z_acc(j) = (Z(j)+Z(j+1))/2;
+end
+g = -9.81;
+Load_Factor = acc/g;
 %% Plot optimized V vs Z
 figure(1)
-plot(Z, V)
-title('Velocity v/s Altitude (Optimized Flight Path)')
-xlabel('Velocity (m/s)')
+set(gcf,'color','w');
+plot(Mach, Z)
+hold on
+plot(Load_Factor, Z_acc)
+title('Trajectory Properties v/s Altitude (Optimized Flight Path')
+legend('Mach', 'Load Factor')
+xlabel('Property')
 ylabel('Altitude (m)')
-legend('Velocity')
 
-figure(2)
-plot(Z, Mach)
-title('Mach v/s Altitude (Optimized Flight Path')
-xlabel('Altitude (m)')
-ylabel('Mach')
 %% Find Cp_0 along the Flight Path
 gamma = gamma_atmos;
 M1 = Mach;
@@ -64,10 +73,10 @@ for i = 1:5
     % Fix wall temperature
     T_w = T_e(i);
     % Tauber Menees
-    T_aw = T_traj + r*V.^2./(2*C_p0);
-    % T_aw = 100000;
+    %T_aw = T_traj + r*V.^2./(2*C_p0);
+    T_aw = 1800;
     C = (1.83*10^-8)*R_n^-0.5*(1-T_w/T_aw)*10000;
-    q_w{i} = C*rho_traj.^N.*V.^M;
+    q_w{i} = (C*rho_traj.^N.*V.^M)/1000;
 end
 
 %% Calculate Blackbody Radiation along Traj
@@ -79,26 +88,27 @@ for i = 1:5
     % Fix wall temperature
     T_w = T_e(i);
     % Tauber Menees
-    q_r{i} = eps*sigma*T_w^4 * ones(length(Z),1);
+    q_r{i} = (eps*sigma*T_w^4 * ones(length(Z),1))/1000;
 end
 
 %% Correct q_total
 
 q_total = {};
 for i = 1:5
-    q_total{i} = q_w{i} - q_r{i};
+    q_total{i} = (q_w{i} - q_r{i});
 end
 
 %% Plotting q_w and q_total
 
-figure(3)
-plot(Z, q_w{1})
+figure(2)
+set(gcf,'color','w');
+plot(q_w{1}, Z)
 hold on
-plot(Z, q_total{1})
-title('Stagnation Flux along Trajectory, T_w = 800 K')
-xlabel('q_w (kW/m^2)')
+plot(Dynamic_Pressure, Z)
+title('Trajectory Properties v/s Altitude')
+xlabel('Properties')
 ylabel('Altitude (m)')
-legend('Without Blackbody Radiation','With Blackbody Radiation')
+legend('Q_{wall}','Dynamic Pressure')
 
 %% Plotting q_total across T
 

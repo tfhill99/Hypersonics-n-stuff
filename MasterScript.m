@@ -106,24 +106,12 @@ while any(A - B > 0.05)
     fprintf('k = %d',k);
     A = C_D_change{k};
     B = C_D_change{k-1};
+    
 end
 
 C_D_final = C_D_change{k}; 
-%C_D_final = C_D_final(1:clip_index); 
-
 C_L_final = C_L_change{k}; 
-%C_L_final = C_L_final(1:clip_index);
-
 C_M_final = C_M_change{k};
-%C_M_final = C_M_final(1:clip_index);
-
-%C = pressures_save{u}; 
-%C = C(:, 1:clip_index); 
-%pressures_save{u} = C; 
-
-%C = Cps_save{u}; 
-%C = C(:, 1:clip_index); 
-%Cps_save{u} = C; 
 
 disp('Done');
 
@@ -142,18 +130,12 @@ set(gcf,'color','w');
 plot(M1, C_D_final);
 xlabel('Mach Number');
 ylabel('C_d');
-title('Converged C_D versus Mach for AoA = 0');
+title('Converged C_D versus Mach for AoA = 25');
 
 %% Test Matrix
 
 % Altitude, Velocity, Mach, Acceleration, Temperature, Density
-idx = 0;
-for i = 1:length(M1)
-    if ~isnan(M1(i))
-        idx = idx+1;
-    end
-end
-total = idx;
+total = length(M1);
 increment = cast(total/7, "uint8");
 
 Z_table = [Z(1), Z(1+increment), Z(1+2*increment), Z(1+3*increment), Z(1+4*increment), Z(1+5*increment), Z(1+6*increment), Z(total)].';
