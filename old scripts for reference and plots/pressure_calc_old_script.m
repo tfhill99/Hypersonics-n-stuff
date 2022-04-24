@@ -27,7 +27,6 @@ thetas = [];
 Cp = []; 
 
 
-
 for i = 1:length(F)
     N = F(i,:); 
     sin_theta = sum((V.*N)/velocity1); 
