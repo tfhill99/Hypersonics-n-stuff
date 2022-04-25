@@ -79,6 +79,7 @@ for i = 1:length(T_aw)
     T_w_TM(i) = temp(temp > 0);
 end
 
+
 figure(1)
 plot(T_w_TM, Z/1000); 
 xlabel('T_w (K)'); 
@@ -110,18 +111,16 @@ xlabel('Time (s)');
 title('Time History of Stagnation q_w Using Tauber Menees');
 
 %% discretization
-time_new = interp1(Z, time, z_needed); 
-%%
-%T_w_TM_interp = transpose(T_w_TM);
 z_needed = [120 110 100 90 82 78 70 65 62 58 56 52 48 42 35 30] * 1000; 
-%V = interp1(Z, V, z_needed); 
-%rho_traj = interp1(Z, rho_traj, z_needed); 
-%alpha_r = interp1(Z, alpha_r, z_needed); 
+V = interp1(Z, V, z_needed); 
+rho_traj = interp1(Z, rho_traj, z_needed); 
+alpha_r = interp1(Z, alpha_r, z_needed); 
 q_w_stag_TM_new = interp1(Z, q_w_stag_TM, z_needed); 
-
-%T_traj = interp1(Z, T_traj, z_needed); 
+time_new = interp1(Z, time, z_needed); 
+T_traj = interp1(Z, T_traj, z_needed); 
+Mach_new = interp1(Z, Mach, z_needed); 
 Z_new = interp1(Z, Z, z_needed); 
-T_w_TM_new = interp1(Z, T_w_TM_interp, z_needed); 
+
 
 %% checking discretization
 figure(2)
@@ -152,10 +151,11 @@ broad_local_T_aw_TM = {};
 broad_local_qw = {}; 
 broad_local_x = {}; 
 broad_local_x_dist = {}; 
+broad_local_x_dist_plot = {}; 
 
 vect_indices_1 = find(pts(:,2) > -5);
 vect_indices_2 = find(pts(:,2) < 5); 
-vect_indices_3 = find(pts(:,1) < 0); 
+vect_indices_3 = find(pts(:,1) > 0); 
 %vect_indices_4 = find(pts(:,3) > 0); 
 [vect_indices, eh] = intersect(vect_indices_1, vect_indices_2);
 [vect_indices, eh] = intersect(vect_indices, vect_indices_3); 
@@ -187,7 +187,7 @@ for i = 1:length(V)
         sin_theta = sum((V_vec.*N)/V_mag); 
         local_alphas(j) = asin(sin_theta); 
         if local_alphas(j) <= 0
-            C_p(j) = 0; 
+            C_p(j) = -2/(1.4 * Mach_new(i)^2); 
         else
             C_p(j) = C_p0(i) * sin_theta^2; 
         end
@@ -228,6 +228,7 @@ for i = 1:length(V)
     %cross_sec_cp = reshape(cross_sec_cp, [length(cross_sec_cp), 1]);
     %cross_sec_pts = reshape(cross_sec_pts, [length(cross_sec_pts), 1]);
 
+    %{
     [cross_sec_pts_x_sorted, I] = sort(cross_sec_pts(:,1));
     cspy = cross_sec_pts(:,2); 
     cspz = cross_sec_pts(:,3); 
@@ -237,28 +238,70 @@ for i = 1:length(V)
     cross_sec_Tw = cross_sec_Tw(I);
     cross_sec_Taw = cross_sec_Taw(I);
     cross_sec_alpha = cross_sec_alpha(I);
+    %}
+
+    [cross_sec_pts_z_sorted, I] = sort(cross_sec_pts(:,3));
+    cspy = cross_sec_pts(:,2); 
+    cspx = cross_sec_pts(:,1); 
+
+    cross_sec_pts = [flip(cspx(I)) flip(cspy(I)) flip(cross_sec_pts_z_sorted)]; 
+    cross_sec_cp = flip(cross_sec_cp(I)); 
+    cross_sec_Tw = flip(cross_sec_Tw(I));
+    cross_sec_Taw = flip(cross_sec_Taw(I));
+    cross_sec_alpha = flip(cross_sec_alpha(I));
 
     x_dist = [0]; 
 
-    N = 0.8; 
-    M = 3.7; 
-
     cross_sec_qw = [0]; 
+
+    x_dist_plot = [0]; 
+
+    a = 0.855; 
+    b = 0.145; 
+
+    last_index = -1; 
+    last_point = [];
 
     for lc2 = 2:length(cross_sec_cp)
         p2 = cross_sec_pts(lc2, :); 
         p1 = cross_sec_pts(lc2-1, :); 
-        x_dist(lc2) = (x_dist(lc2-1)) + (norm(p2-p1))/1000; 
-        % x_dist(lc2) = x_dist(lc2) / 1000; 
+        % x_dist(lc2) = (x_dist(lc2-1)) + (norm(p2-p1))/1000; 
+        % x_dist(lc2) = x_dist(lc2) / 1000;  
 
-        C = 2.2e-5 * cos(cross_sec_alpha(lc2))^2.08 * sin(cross_sec_alpha(lc2))^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
+        phi = abs(atan(abs(p2(1))/(p2(3)-291)));
+       
+        if phi < pi/4 
+            disp(rad2deg(phi)); 
+            disp(lc2); 
+            cross_sec_qw(lc2) = q_w_stag_TM_new(i) * (a * cos(phi)^1.5 + b); 
+            x_dist_plot(lc2) = phi/(2*pi) * (2 * pi * 0.272); 
+            last_index = lc2; 
+            last_point = p2; 
+            x_dist(lc2) = x_dist_plot(lc2); 
+        else
+            x_dist(lc2) = x_dist(lc2-1) + (norm(p2 - p1))/1000; 
+            %C = 2.2e-5 * cos(cross_sec_alpha(lc2))^2.08 * sin(cross_sec_alpha(lc2))^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
+            
+            % C = 2.2e-5 * cos(pi/4)^2.08 * sin(pi/4)^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
 
-        cross_sec_qw(lc2) = C * rho_traj(i)^N * V_mag^M; 
+            C = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * x_dist(lc2)^(-1/2) * (1 - cross_sec_Tw(lc2)/cross_sec_Taw(lc2)); 
+            N = 0.5; 
+            M = 3.2; 
+            cross_sec_qw(lc2) = C * rho_traj(i)^N * V_mag^M; 
+            x_dist_plot(lc2) = x_dist(lc2); 
+        end
+       
+        %C = 2.2e-5 * cos(cross_sec_alpha(lc2))^2.08 * sin(cross_sec_alpha(lc2))^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
+        %cross_sec_qw(lc2) = C * rho_traj(i)^N * V_mag^M;
+
+
+        
     end
 
     broad_local_qw{i} = cross_sec_qw; 
     broad_local_x_dist{i} = x_dist; 
     broad_local_x{i} = cross_sec_pts(:, 1); 
+    broad_local_x_dist_plot{i} = x_dist_plot; 
 
     
 end
@@ -266,22 +309,22 @@ end
 %%
 qw_curr = broad_local_qw{7}; 
 x_curr = broad_local_x{7}; 
-x_dist_curr = broad_local_x_dist{7}
+x_dist_curr = broad_local_x_dist_plot{7};
 
 figure(10); 
-plot(qw_curr/1000, x_curr); 
-xlabel('X coordinate (m)'); 
+scatter(x_dist_curr, qw_curr/1000);
+xlabel('Curvilinear Abscissa (m)'); 
 ylabel('q_w (kW/m^2)'); 
-title('q_w across cross section plane v/s x-coordinate at 70 km'); 
+title('q_w across cross section at 70 km Altitude');
 
-figure(11); 
-plot(qw_curr(3:length(qw_curr))/1000, x_dist_curr(3:length(x_dist_curr))); 
-xlabel('Distane Along Body Surface (m)'); 
+figure(11)
+scatter(broad_local_x_dist_plot{3}, broad_local_qw{3}/1000); 
+hold on; 
+scatter(broad_local_x_dist_plot{12}, broad_local_qw{12}/1000); 
+xlabel('Curvilinear Abscissa (m)'); 
 ylabel('q_w (kW/m^2)'); 
-title('q_w across cross section plane v/s distance along body surface at 70 km'); 
-%% 
-
-plot(x_dist_curr, qw_curr/1000); 
+title('q_w across cross section at Different Altitudes');
+legend('100 km', '52 km'); 
 %%
 T_w_curr = broad_local_T_W_TM{7}; 
 
