@@ -79,7 +79,6 @@ for i = 1:length(T_aw)
     T_w_TM(i) = temp(temp > 0);
 end
 
-
 figure(1)
 plot(T_w_TM, Z/1000); 
 xlabel('T_w (K)'); 
@@ -111,15 +110,16 @@ xlabel('Time (s)');
 title('Time History of Stagnation q_w Using Tauber Menees');
 
 %% discretization
+T_w_TM_interp = transpose(T_w_TM);
 z_needed = [120 110 100 90 82 78 70 65 62 58 56 52 48 42 35 30] * 1000; 
-V = interp1(Z, V, z_needed); 
-rho_traj = interp1(Z, rho_traj, z_needed); 
-alpha_r = interp1(Z, alpha_r, z_needed); 
+%V = interp1(Z, V, z_needed); 
+%rho_traj = interp1(Z, rho_traj, z_needed); 
+%alpha_r = interp1(Z, alpha_r, z_needed); 
 q_w_stag_TM_new = interp1(Z, q_w_stag_TM, z_needed); 
 time_new = interp1(Z, time, z_needed); 
-T_traj = interp1(Z, T_traj, z_needed); 
+%T_traj = interp1(Z, T_traj, z_needed); 
 Z_new = interp1(Z, Z, z_needed); 
-
+T_w_TM_new = interp1(Z, T_w_TM_interp, z_needed); 
 
 %% checking discretization
 figure(2)
