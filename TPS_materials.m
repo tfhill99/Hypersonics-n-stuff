@@ -26,6 +26,10 @@ max_temp_Rescor310M = 1650; % °C
 max_temp_Rescor311 = 1430; % °C
 max_temp_Intek1120 = 300; % °C
 
+alpha_FW12 = lambda_FW12/(rho_FW12*c_FW12);
+alpha_Rescor310M = lambda_Rescor310M/(rho_Rescor310M*c_Rescor310M);
+alpha_Rescor311 = lambda_Rescor311/(rho_Rescor311*c_Rescor311);
+alpha_Intek1120 = lambda_Intek1120/(rho_Intek1120*c_Intek1120);
 
 %% Flexible TPS Materials
 

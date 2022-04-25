@@ -1,12 +1,12 @@
-thickness = 7.5; %mm
+thickness = 0.06; %m
 steps = 1000; %discretization
-total_time = 100; %steps of solving
+total_time = 200; %steps of solving
 
 dx = thickness/steps;
 dt = total_time/steps;
 
-alpha = 64; % mm^2/2 slide 4 lecture 19 for TiC 1/thermal diffusivity
-thermal_conductivity = 0.237; %W/mm/K
+alpha = 0.0063; %alpha_FW12; % m^2/s
+thermal_conductivity = sqrt(0.0063*11.96); %lambda_FW12; %W/m/K
 sigma = 5.6695e-8; 
 eps = 0.9; 
 
@@ -15,11 +15,12 @@ if dt > 0.5*dx^2/alpha
 end
 
 %% With flux
-q1 = 800;
+q1 = 800; 
 T = ones(n,1)*225;
 n = steps;
 b = ones(n,1)*1/2*alpha*dt/(dx^2);
 b_mat = 1/2*alpha*dt/(dx^2);
+
 q = [];
 for i = 1:steps
     if i == 1
@@ -65,5 +66,5 @@ figure(1)
 plot(T_front)
 hold on
 plot(T_back)
-
+legend('front', 'back')
 

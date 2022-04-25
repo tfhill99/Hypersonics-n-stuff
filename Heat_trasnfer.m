@@ -1,12 +1,12 @@
-thickness = 7.5; %mm
-steps = 10000; %discretization
-total_time = 100; %steps of solving
+thickness = 0.060; %m
+steps = 500; %discretization
+total_time = 5000; %steps of solving
 
 dx = thickness/steps;
-dt = 0.0001; %total_time/steps;
+dt = total_time/steps;
 
-alpha = 64; % mm^2/2 slide 4 lecture 19 for TiC 1/thermal diffusivity
-thermal_conductivity = 0.237; %W/mm/K
+alpha = alpha_nextel; % m^2/s
+thermal_conductivity = lambda_nextel; %W/m/K
 sigma = 5.6695e-8; 
 eps = 0.9; 
 
@@ -15,11 +15,12 @@ if dt > 0.5*dx^2/alpha
 end
 
 %% With flux
-q1 = 800;
-T = ones(n,1)*225;
+q1 = 800; 
 n = steps;
+T = ones(n,1)*225; %K
 b = ones(n,1)*1/2*alpha*dt/(dx^2);
 b_mat = 1/2*alpha*dt/(dx^2);
+
 q = [];
 for i = 1:steps
     if i == 1
@@ -45,7 +46,7 @@ T_back = [];
 
 for n=1:total_time
     % adjust the right matrix based on the fixed value on boundary
-    T = inv(mat)*transpose(q);
+    T = mat\transpose(q);
     T_front(n) = T(1);
     T_back(n) = T(steps);
     for i = 1:steps
