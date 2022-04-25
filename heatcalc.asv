@@ -79,7 +79,6 @@ for i = 1:length(T_aw)
     T_w_TM(i) = temp(temp > 0);
 end
 
-
 figure(1)
 plot(T_w_TM, Z/1000); 
 xlabel('T_w (K)'); 
@@ -111,15 +110,16 @@ xlabel('Time (s)');
 title('Time History of Stagnation q_w Using Tauber Menees');
 
 %% discretization
+%T_w_TM_interp = transpose(T_w_TM);
 z_needed = [120 110 100 90 82 78 70 65 62 58 56 52 48 42 35 30] * 1000; 
-V = interp1(Z, V, z_needed); 
-rho_traj = interp1(Z, rho_traj, z_needed); 
-alpha_r = interp1(Z, alpha_r, z_needed); 
+%V = interp1(Z, V, z_needed); 
+%rho_traj = interp1(Z, rho_traj, z_needed); 
+%alpha_r = interp1(Z, alpha_r, z_needed); 
 q_w_stag_TM_new = interp1(Z, q_w_stag_TM, z_needed); 
 time_new = interp1(Z, time, z_needed); 
-T_traj = interp1(Z, T_traj, z_needed); 
+%T_traj = interp1(Z, T_traj, z_needed); 
 Z_new = interp1(Z, Z, z_needed); 
-
+%T_w_TM_new = interp1(Z, T_w_TM_interp, z_needed); 
 
 %% checking discretization
 figure(2)
@@ -154,9 +154,11 @@ broad_local_x_dist = {};
 vect_indices_1 = find(pts(:,2) > -5);
 vect_indices_2 = find(pts(:,2) < 5); 
 vect_indices_3 = find(pts(:,1) < 0); 
-vect_indices_4 = fi
+%vect_indices_4 = find(pts(:,3) > 0); 
 [vect_indices, eh] = intersect(vect_indices_1, vect_indices_2);
 [vect_indices, eh] = intersect(vect_indices, vect_indices_3); 
+%[vect_indices, eh] = intersect(vect_indices, vect_indices_4); 
+
 
 for i = 1:length(V)
     V_mag = V(i); 
@@ -262,20 +264,22 @@ end
 %%
 qw_curr = broad_local_qw{7}; 
 x_curr = broad_local_x{7}; 
-x_dist_curr = broad_local_x_dist{7}; 
+x_dist_curr = broad_local_x_dist{7}
 
-figure(1); 
+figure(10); 
 plot(qw_curr/1000, x_curr); 
 xlabel('X coordinate (m)'); 
 ylabel('q_w (kW/m^2)'); 
 title('q_w across cross section plane v/s x-coordinate at 70 km'); 
 
-figure(2); 
-plot(qw_curr/1000, x_dist_curr); 
+figure(11); 
+plot(qw_curr(3:length(qw_curr))/1000, x_dist_curr(3:length(x_dist_curr))); 
 xlabel('Distane Along Body Surface (m)'); 
 ylabel('q_w (kW/m^2)'); 
 title('q_w across cross section plane v/s distance along body surface at 70 km'); 
+%% 
 
+plot(x_dist_curr, qw_curr/1000); 
 %%
 T_w_curr = broad_local_T_W_TM{7}; 
 
