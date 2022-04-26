@@ -294,7 +294,6 @@ for i = 1:length(V)
         %C = 2.2e-5 * cos(cross_sec_alpha(lc2))^2.08 * sin(cross_sec_alpha(lc2))^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
         %cross_sec_qw(lc2) = C * rho_traj(i)^N * V_mag^M;
 
-
         
     end
 

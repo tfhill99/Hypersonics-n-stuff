@@ -1,4 +1,4 @@
-qw = q_w_stag_TM(1:12000); 
+%qw = q_w_stag_TM(1:12000); 
 n = 100; %discretization
 %total_time = time(12000); %steps of solving
 
@@ -6,6 +6,12 @@ thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_nextel, alpha_sigratherm, alpha_pyrogel, alpha_pyrogel]; % m^2/s
 lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Rescor311, lambda_nextel, lambda_sigratherm, lambda_pyrogel, lambda_pyrogel]; %W/m/K
+
+eps = 0.9; 
+sigma = 5.6695e-8;
+[time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, q_w_stag_TM, C_p, T_w_TM, q_w_TM] = traj_params_heat(sigma, eps);
+
+qw = q_w_stag_TM; 
 
 cumthick = 0;
 cum_thickness = ones(7,1);
@@ -21,8 +27,8 @@ for i= 1:length(thickness)
     indices(i) = sum(sizes);
 end
 
-sigma = 5.6695e-8; 
-eps = 0.9; 
+% sigma = 5.6695e-8; 
+% eps = 0.9; 
 
 dx = total_thickness/n;
 dts = 0.7*0.5*dx^2./alphas; %5e-6
@@ -81,6 +87,7 @@ for idx=1:12000
             else
                 b_mat = 0.5*alphas(7)*dts(7)/(dx^2);
             end
+            disp(i)
             q(i) = b_mat*T(i-1)+(1-2*b_mat)*T(i)+b_mat*T(i+1);
         end
     end
