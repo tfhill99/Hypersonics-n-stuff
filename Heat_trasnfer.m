@@ -1,17 +1,18 @@
-total_thickness = 0.0060; %m
 qw = q_w_stag_TM(1:12000); 
 n = 200; %discretization
 %total_time = time(12000); %steps of solving
 
 thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
-alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
-lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
+total_thickness = sum(thickness); %m
+alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_nextel, alpha_sigratherm, alpha_pyrogel, alpha_pyrogel]; % m^2/s
+lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Rescor311, lambda_nextel, lambda_sigratherm, lambda_pyrogel, lambda_pyrogel]; %W/m/K
 
 cumthick = 0;
 cum_thickness = ones(7,1);
 sizes = zeros(7,1);
 indices = zeros(7,1);
 current_pos = 0;
+
 for i= 1:length(thickness)
     cumthick = cumthick + thickness(i);
     cum_thickness(i) = cumthick;
@@ -23,20 +24,19 @@ end
 sigma = 5.6695e-8; 
 eps = 0.9; 
 
-%dxs = thickness/n;
 dx = total_thickness/n;
-dts = (0.9*0.5)*dx^2./alphas;
+dts = 0.97*0.5*dx^2./alphas; %5e-6
 
 %% Setup matrixes
 
 A_total = [];
 for i = 1:length(sizes)
     b = ones(sizes(i),1)*1/2*alphas(i)*dts(i)/(dx^2);
-    A = spdiags([-b 1+2*b -b],-1:1,sizes(i),sizes(i));
+    A = spdiags([-b 1+2*b -b],-1:1, sizes(i),sizes(i));
     if i == 1
         A(1,1) = -1;
         A(1,2) = 1;
-    elseif i==length(sizes)
+    elseif i == length(sizes)
         A(sizes(i),sizes(i)-1) = -1;
         A(sizes(i),sizes(i)) = 1;
     end
@@ -56,7 +56,6 @@ T_back = [];
 T_13 = []; 
 T_23 = []; 
 n = length(A_total);
-
 
 for idx=1:12000
     % set q matrix each time with updated stangation flux, qw(idx)
@@ -88,8 +87,8 @@ for idx=1:12000
     
     T = A_total\transpose(q);
     T_front(idx) = T(1);
-    T_13(idx) = T(int16(n/3)); 
-    T_23(idx) = T(int16(2*n/3)); 
+    T_13(idx) = T(round(n/3)); 
+    T_23(idx) = T(round(2*n/3)); 
     T_back(idx) = T(n);
 end
 
@@ -105,7 +104,7 @@ plot(T_13)
 hold on
 plot(T_23)
 hold on
-plot(baseline)
+plot(baseline, '--')
 legend('front', 'back','1/3','2/3','limit')
 set(gcf,'color','w');
 
