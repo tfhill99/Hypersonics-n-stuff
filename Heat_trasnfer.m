@@ -3,8 +3,8 @@ n = 100; %discretization
 
 thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_nextel, alpha_sigratherm, alpha_pyrogel, alpha_pyrogel]; % m^2/s
-lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Rescor311, lambda_nextel, lambda_sigratherm, lambda_pyrogel, lambda_pyrogel]; %W/m/K
+alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
+lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
 
 eps = 0.9; 
 sigma = 5.6695e-8;
@@ -35,10 +35,8 @@ dt = 0.9*0.5*dx^2./max(alphas);
 
 total_time = time(12000);
 integration_len = round(total_time/dt);
-integration_array = (0:integration_len-1)*dt;
-%time_int = linspace(0, total_time, 10000);
-
-%time_integrate = interp1(total_time, time(1:12000)) 
+time_integ = (0:integration_len-1)*dt;
+qw_integ = interp1(time(1:12000), qw, time_integ); 
 
 %% Setup matrixes
 
@@ -62,20 +60,19 @@ for i= 1:length(sizes)-1
     A_total(indices(i)+1,indices(i)) = -b;
 end
 %%
-
+n = length(A_total);
 T = ones(n,1)*225; %K initial atmospheric temperature at 120 km across traj
 T_front = [];
 T_back = [];
 T_13 = []; 
 T_23 = []; 
-n = length(A_total);
 
-for idx=1:12000
+for idx=1:integration_len
     % set q matrix each time with updated stangation flux, qw(idx)
     q = [];
     for i = 1:n
         if i == 1
-            q(i) = -dx/lambdas(1)*(qw(idx)-sigma*eps*T(1)^4);
+            q(i) = -dx/lambdas(1)*(qw_integ(idx)-sigma*eps*T(1)^4);
         elseif i == n
             q(i) = -dx/lambdas(7)*sigma*eps*T(n)^4;
         else

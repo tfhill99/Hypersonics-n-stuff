@@ -31,19 +31,18 @@ end
 %% Setup integration parameters 
 
 dx = total_thickness/n;
-dts = 0.9*0.5*dx^2./alphas; 
+dt = 0.9*0.5*dx^2./max(alphas); 
 
 total_time = time(12000);
-n = total_time / average
-time_int = linspace(0, total_time, 10000);
-
-%time_integrate = interp1(total_time, time(1:12000)) 
+integration_len = round(total_time/dt);
+time_integ = (0:integration_len-1)*dt;
+qw_integ = interp1(time(1:12000), qw, time_integ); 
 
 %% Setup matrixes
 
 A_total = [];
 for i = 1:length(sizes)
-    b = ones(sizes(i),1)*1/2*alphas(i)*dts(i)/(dx^2);
+    b = ones(sizes(i),1)*1/2*alphas(i)*dt/(dx^2);
     A = spdiags([-b 1+2*b -b],-1:1, sizes(i),sizes(i));
     if i == 1
         A(1,1) = -1;
@@ -56,42 +55,41 @@ for i = 1:length(sizes)
 end
 
 for i= 1:length(sizes)-1
-    b  = 1/2*alphas(i)*dts(i)/(dx^2);
+    b  = 1/2*alphas(i)*dt/(dx^2);
     A_total(indices(i),indices(i)+1) = -b;
     A_total(indices(i)+1,indices(i)) = -b;
 end
 %%
-
+n = length(A_total);
 T = ones(n,1)*225; %K initial atmospheric temperature at 120 km across traj
 T_front = [];
 T_back = [];
 T_13 = []; 
 T_23 = []; 
-n = length(A_total);
 
-for idx=1:12000
+for idx=1:integration_len
     % set q matrix each time with updated stangation flux, qw(idx)
     q = [];
     for i = 1:n
         if i == 1
-            q(i) = -dx/lambdas(1)*(qw(idx)-sigma*eps*T(1)^4);
+            q(i) = -dx/lambdas(1)*(qw_integ(idx)-sigma*eps*T(1)^4);
         elseif i == n
             q(i) = -dx/lambdas(7)*sigma*eps*T(n)^4;
         else
             if i <= indices(1)
-                b_mat = 0.5*alphas(1)*dts(1)/(dx^2);
+                b_mat = 0.5*alphas(1)*dt/(dx^2);
             elseif (indices(1) < i) && (i <= indices(2))
-                b_mat = 0.5*alphas(2)*dts(2)/(dx^2);
+                b_mat = 0.5*alphas(2)*dt/(dx^2);
             elseif (indices(2) < i) && (i <= indices(3))
-                b_mat = 0.5*alphas(3)*dts(3)/(dx^2);
+                b_mat = 0.5*alphas(3)*dt/(dx^2);
             elseif (indices(3) < i) && (i <= indices(4))
-                b_mat = 0.5*alphas(4)*dts(4)/(dx^2);
+                b_mat = 0.5*alphas(4)*dt/(dx^2);
             elseif (indices(4) < i) && (i <= indices(5))
-                b_mat = 0.5*alphas(5)*dts(5)/(dx^2);
+                b_mat = 0.5*alphas(5)*dt/(dx^2);
             elseif (indices(5) < i) && (i <= indices(6))
-                b_mat = 0.5*alphas(6)*dts(6)/(dx^2);
+                b_mat = 0.5*alphas(6)*dt/(dx^2);
             else
-                b_mat = 0.5*alphas(7)*dts(7)/(dx^2);
+                b_mat = 0.5*alphas(7)*dt/(dx^2);
             end
             q(i) = b_mat*T(i-1)+(1-2*b_mat)*T(i)+b_mat*T(i+1);
         end
