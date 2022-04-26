@@ -1,5 +1,5 @@
 qw = q_w_stag_TM(1:12000); 
-n = 200; %discretization
+n = 100; %discretization
 %total_time = time(12000); %steps of solving
 
 thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
@@ -25,7 +25,7 @@ sigma = 5.6695e-8;
 eps = 0.9; 
 
 dx = total_thickness/n;
-dts = 0.97*0.5*dx^2./alphas; %5e-6
+dts = 0.7*0.5*dx^2./alphas; %5e-6
 
 %% Setup matrixes
 
