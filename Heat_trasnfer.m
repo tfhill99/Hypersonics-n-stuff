@@ -11,7 +11,9 @@ eps = 0.9;
 sigma = 5.6695e-8;
 [time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, q_w_stag_TM, C_p, T_w_TM, q_w_TM] = traj_params_heat(sigma, eps);
 
-qw = q_w_stag_TM; 
+% set this to q_w_stag_TM if looking at stagnation point
+% set this to q_w_TM if looking at point midway on cone
+qw = q_w_TM; 
 
 cumthick = 0;
 cum_thickness = ones(7,1);
