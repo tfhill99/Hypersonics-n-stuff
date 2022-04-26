@@ -1,6 +1,5 @@
 %qw = q_w_stag_TM(1:12000); 
 n = 100; %discretization
-%total_time = time(12000); %steps of solving
 
 thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
 total_thickness = sum(thickness); %m
@@ -11,7 +10,9 @@ eps = 0.9;
 sigma = 5.6695e-8;
 [time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, q_w_stag_TM, C_p, T_w_TM, q_w_TM] = traj_params_heat(sigma, eps);
 
-qw = q_w_stag_TM; 
+% set this to q_w_stag_TM if looking at stagnation point
+% set this to q_w_TM if looking at point midway on cone
+qw = q_w_stag_TM(1:12000); 
 
 cumthick = 0;
 cum_thickness = ones(7,1);
@@ -27,11 +28,16 @@ for i= 1:length(thickness)
     indices(i) = sum(sizes);
 end
 
-% sigma = 5.6695e-8; 
-% eps = 0.9; 
+%% Setup integration parameters 
 
 dx = total_thickness/n;
-dts = 0.7*0.5*dx^2./alphas; %5e-6
+dts = 0.9*0.5*dx^2./alphas; 
+
+total_time = time(12000);
+n = total_time / average
+time_int = linspace(0, total_time, 10000);
+
+%time_integrate = interp1(total_time, time(1:12000)) 
 
 %% Setup matrixes
 
@@ -87,7 +93,6 @@ for idx=1:12000
             else
                 b_mat = 0.5*alphas(7)*dts(7)/(dx^2);
             end
-            disp(i)
             q(i) = b_mat*T(i-1)+(1-2*b_mat)*T(i)+b_mat*T(i+1);
         end
     end
@@ -112,7 +117,15 @@ hold on
 plot(T_23)
 hold on
 plot(baseline, '--')
-legend('front', 'back','1/3','2/3','limit')
+legend('front', '6 mm','2 mm','4 mm','70 C')
+set(gcf,'color','w');
+
+%%
+figure(2)
+plot(q_w_TM(1:12000))
+hold on
+plot(q_w_stag_TM(1:12000))
+legend('MidPoint', 'Cone')
 set(gcf,'color','w');
 
 
