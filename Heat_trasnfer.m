@@ -65,8 +65,10 @@ end
 
 for i= 1:length(sizes)-1
     b  = 1/2*alphas(i)*dt/(dx^2);
+    b_trans = 1/2*alphas(i+1)*dt/(dx^2);
     A_total(indices(i),indices(i)+1) = -b;
     A_total(indices(i)+1,indices(i)) = -b;
+    A_total(indices(i),indices(i)) = 1 + b + b_trans;
 end
 %%
 n = length(A_total);
