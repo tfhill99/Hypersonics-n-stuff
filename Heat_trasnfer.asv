@@ -1,18 +1,23 @@
 %qw = q_w_stag_TM(1:12000); 
 n = 100; %discretization
 
+R_N = 0.272; %m
+
 thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_nextel, alpha_sigratherm, alpha_pyrogel, alpha_pyrogel]; % m^2/s
-lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Rescor311, lambda_nextel, lambda_sigratherm, lambda_pyrogel, lambda_pyrogel]; %W/m/K
+alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
+lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
 
 eps = 0.9; 
 sigma = 5.6695e-8;
-[time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, q_w_stag_TM, C_p, T_w_TM, q_w_TM] = traj_params_heat(sigma, eps);
+[time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, T_aw_TM_stag, q_w_stag_TM, C_p, T_w_TM, T_aw_TM, q_w_TM] = traj_params_heat(sigma, eps);
 
 % set this to q_w_stag_TM if looking at stagnation point
 % set this to q_w_TM if looking at point midway on cone
 qw = q_w_stag_TM(1:12000); 
+T_w = T_w_TM_stag(1:12000); 
+T_aw = T_aw_TM_stag(1:12000); 
+at_stagnation = true; 
 
 cumthick = 0;
 cum_thickness = ones(7,1);
@@ -37,6 +42,9 @@ total_time = time(12000);
 integration_len = round(total_time/dt);
 time_integ = (0:integration_len-1)*dt;
 qw_integ = interp1(time(1:12000), qw, time_integ); 
+T_aw_integ = interp1(time(1:12000), T_aw(1:12000), time_integ); 
+V_integ = interp1(time(1:12000), V(1:12000), time_integ); 
+rho_integ = interp1(time(1:12000), rho_traj(1:12000), time_integ); 
 
 %% Setup matrixes
 
@@ -100,6 +108,23 @@ for idx=1:integration_len
     T_13(idx) = T(round(n/3)); 
     T_23(idx) = T(round(2*n/3)); 
     T_back(idx) = T(n);
+
+    if at_stagnation
+        if idx ~= integration_len
+            disp('here')
+            N = 0.5; 
+            M = 3; 
+            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
+        end
+    else 
+        if idx~= integration_len
+            curvilinear_abscissa = 0.56; 
+            N = 0.5; 
+            M = 3.2
+            qw_integ(idx+1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M; 
+        end
+    end
+
 end
 
 %% Plotting

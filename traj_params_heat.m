@@ -1,4 +1,4 @@
-function [time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, q_w_stag_TM, C_p, T_w_TM, q_w_TM] = traj_params_heat(sigma_inp, epsilon)
+function [time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, T_aw, q_w_stag_TM, C_p, T_w_TM, T_aw_TM, q_w_TM] = traj_params_heat(sigma_inp, epsilon)
 %Read in variables
 traj = table2array(readtable('OptimizedPathDatabase.xlsx'));
 time = traj(3:end,1);
