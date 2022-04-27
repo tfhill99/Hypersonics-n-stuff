@@ -1,7 +1,7 @@
 n = 100; %discretization
 R_N = 0.272; %m
 
-thickness = [0.001, 0.001, 0.001, 0.001];
+thickness = [0.01, 0.01, 0.01, 0.01];
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
 lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
@@ -10,9 +10,9 @@ eps = 0.9;
 sigma = 5.6695e-8;
 
 cumthick = 0;
-cum_thickness = ones(7,1);
-sizes = zeros(7,1);
-indices = zeros(7,1);
+cum_thickness = ones(4,1);
+sizes = zeros(4,1);
+indices = zeros(4,1);
 current_pos = 0;
 
 for i= 1:length(thickness)
@@ -27,7 +27,6 @@ traj = table2array(readtable('OptimizedPathDatabase.xlsx'));
 time = traj(3:end,1);
 V = traj(3:end,2);
 alpha_r = traj(3:end,3);
-q = traj(3:end,4);
 X = traj(3:end,5);
 Z = traj(3:end,6);
 theta_r = traj(3:end,7);
@@ -108,7 +107,7 @@ else
             curvilinear_abscissa = 0.56; 
             N = 0.5; 
             M = 3.2;
-            qw_integ(idx+1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T(1)/T_aw_integ(1)) * rho_integ(1)^N * V_integ(1)^M; 
+            qw_integ(1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T(1)/T_aw_integ(1)) * rho_integ(1)^N * V_integ(1)^M; 
 end
 
 for idx=1:integration_len
@@ -166,7 +165,6 @@ for idx=1:integration_len
             qw_integ(idx+1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M; 
         end
     end
-
 end
 
 %% Plotting
