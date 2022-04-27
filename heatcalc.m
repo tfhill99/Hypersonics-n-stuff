@@ -21,6 +21,7 @@ R_atmos = 287; %J/kg/K
 Z_total = flip(Z_total)*1000; %convert to m
 P = flip(P);
 rho = flip(rho);
+T = flip(T); 
 
 T_traj = interp1(Z_total, T, Z);
 P_traj = interp1(Z_total, P, Z);

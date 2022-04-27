@@ -1,6 +1,5 @@
 %qw = q_w_stag_TM(1:12000); 
 n = 100; %discretization
-
 R_N = 0.272; %m
 
 thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
@@ -53,6 +52,7 @@ R_atmos = 287; %J/kg/K
 Z_total = flip(Z_total)*1000; %convert to m
 P = flip(P);
 rho = flip(rho);
+T = flip(T); 
 
 T_traj = interp1(Z_total, T, Z);
 P_traj = interp1(Z_total, P, Z);
@@ -73,7 +73,7 @@ C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 
 r = 0.71; 
 
-T_aw = T_traj + r*V.^2./(2*C_p0);
+T_aw = T_traj + r*V.^2/(2*1.4);
 
 
 %% Setup integration parameters 
@@ -108,8 +108,10 @@ end
 
 for i= 1:length(sizes)-1
     b  = 1/2*alphas(i)*dt/(dx^2);
+    b_next = 1/2*alphas(i+1)*dt/(dx^2);
     A_total(indices(i),indices(i)+1) = -b;
     A_total(indices(i)+1,indices(i)) = -b;
+    A_total(indices(i), indices(i)) = 1 + b + b_next; 
 end
 %%
 n = length(A_total);
