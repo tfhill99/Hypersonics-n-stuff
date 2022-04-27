@@ -1,22 +1,13 @@
-%qw = q_w_stag_TM(1:12000); 
 n = 100; %discretization
 R_N = 0.272; %m
 
-thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
+thickness = [0.001, 0.001, 0.001, 0.001];
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
-lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
+alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
+lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
 
 eps = 0.9; 
 sigma = 5.6695e-8;
-%[time, V, gamma_r, Z, T_traj, rho_traj, P_traj, Mach, C_p0, T_w_TM_stag, T_aw_TM_stag, q_w_stag_TM, C_p, T_w_TM, T_aw_TM, q_w_TM] = traj_params_heat(sigma, eps);
-
-% set this to q_w_stag_TM if looking at stagnation point
-% set this to q_w_TM if looking at point midway on cone
-%qw = q_w_stag_TM(1:12000); 
-%T_w = T_w_TM_stag(1:12000); 
-%T_aw = T_aw_TM_stag(1:12000); 
-at_stagnation = true; 
 
 cumthick = 0;
 cum_thickness = ones(7,1);
@@ -58,23 +49,10 @@ T_traj = interp1(Z_total, T, Z);
 P_traj = interp1(Z_total, P, Z);
 rho_traj = interp1(Z_total, rho, Z);
 
-c_traj = sqrt(gamma_atmos*R_atmos*T_traj);
-
-Mach = V./c_traj;
-
-
-% Find Cp_0 along the Flight Path
-gamma = gamma_atmos;
-M1 = Mach;
-% nose pressure, contingent on shock theory and M1 dependance
-P2_P1 = 1 + 2*gamma/(gamma+1)*(M1.^2-1);
-Pstag_P2 = ((gamma+1)^2*M1.^2./(4*gamma*M1.^2-2*(gamma-1))).^3;
-C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
-
 r = 0.71; 
+cp = 1.4;
 
-T_aw = T_traj + r*V.^2/(2*1.4);
-
+T_aw = T_traj + r*V.^2/(2*cp);
 
 %% Setup integration parameters 
 
@@ -84,11 +62,10 @@ dt = 0.9*0.5*dx^2./max(alphas);
 total_time = time(length(time));
 integration_len = round(total_time/dt);
 time_integ = (0:integration_len-1)*dt;
-% qw_integ = interp1(time(1:12000), qw, time_integ); 
+
 T_aw_integ = interp1(time, T_aw, time_integ); 
 V_integ = interp1(time, V, time_integ); 
 rho_integ = interp1(time, rho_traj, time_integ); 
-% T_w_integ = interp1(time, T_w, time_integ); 
 
 %% Setup matrixes
 
@@ -130,7 +107,7 @@ if at_stagnation
 else 
             curvilinear_abscissa = 0.56; 
             N = 0.5; 
-            M = 3.2
+            M = 3.2;
             qw_integ(idx+1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T(1)/T_aw_integ(1)) * rho_integ(1)^N * V_integ(1)^M; 
 end
 
@@ -162,6 +139,12 @@ for idx=1:integration_len
         end
     end
     
+    for j = 1:length(sizes)-1
+        b  = 1/2*alphas(j)*dt/(dx^2);
+        b_next = 1/2*alphas(j+1)*dt/(dx^2);
+        q(indices(j)) = b*T(i-1)+(1-b-b_next)*T(i)+b_next*T(i+1);
+    end
+
     T = A_total\transpose(q);
     T_front(idx) = T(1);
     T_13(idx) = T(round(n/3)); 
@@ -179,7 +162,7 @@ for idx=1:integration_len
         if idx~= integration_len
             curvilinear_abscissa = 0.56; 
             N = 0.5; 
-            M = 3.2
+            M = 3.2;
             qw_integ(idx+1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M; 
         end
     end
@@ -201,17 +184,4 @@ hold on
 plot(baseline, '--')
 legend('front', '6 mm','2 mm','4 mm','70 C')
 set(gcf,'color','w');
-
-%%
-figure(3)
-plot(qw_integ)
-
-%%
-figure(2)
-plot(q_w_TM(1:12000))
-hold on
-plot(q_w_stag_TM(1:12000))
-legend('MidPoint', 'Cone')
-set(gcf,'color','w');
-
 
