@@ -1,16 +1,16 @@
-n = 500; %discretization
+n = 100; %discretization
 R_N = 0.272; %m
 
-thickness = [0.02, 0.02, 0.02, 0.02];
+thickness = [0.001, 0.001, 0.002, 0.002]; %thickness in m
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_Rescor311]; % m^2/s
-lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_Rescor311]; %W/m/K
+alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_FW12]; % m^2/s
+lambdas = [lambda_FW12, lambda_Rescor310M, alpha_Rescor311, lambda_FW12]; %W/m/K
 
 eps = 0.9; 
 sigma = 5.6695e-8;
 
 cumthick = 0;
-cum_thickness = ones(4,1);
+cum_thickness = zeros(4,1);
 sizes = zeros(4,1);
 indices = zeros(4,1);
 current_pos = 0;
@@ -35,7 +35,6 @@ gamma_r = traj(3:end,8);
 gamma_atmos = 1.4; 
 R_atmos = 287; %J/kg/K
 
-
 [Z_total, Z_L, Z_U, T, P, rho, c, g_atmos, mu, nu, k, n_eh, n_sum]  = atmo(120, 0.01, 1);
 
 % flip trajectory
@@ -56,7 +55,7 @@ T_aw = T_traj + r*V.^2/(2*cp);
 %% Setup integration parameters 
 
 dx = total_thickness/n;
-dt = 0.01; %0.9*0.5*dx^2/max(alphas); 
+dt = 0.999*0.5*dx^2/max(alphas); 
 
 total_time = time(length(time));
 integration_len = round(total_time/dt);
@@ -89,9 +88,10 @@ for i= 1:length(sizes)-1
     A_total(indices(i)+1,indices(i)) = -b;
     A_total(indices(i), indices(i)) = 1 + b + b_next; 
 end
+
 %%
 n = length(A_total);
-T = ones(n,1)*225; %K initial atmospheric temperature at 120 km across traj
+T = ones(n,1)*360; %K initial atmospheric temperature at 120 km across traj
 T_front = [];
 T_back = [];
 T_blayer1 = [];
@@ -165,23 +165,18 @@ end
 
 %% Plotting
 
-baseline = ones(1,length(T_front))*(70+273.15); %back wall
+baseline = ones(1,length(T_front(1:5)))*(70+273.15); %back wall
 figure(1)
-plot(T_front)
+plot(T_front(1:5))
 hold on
-plot(T_back)
+plot(T_back(1:5))
 hold on
-plot(T_blayer1)
+plot(T_blayer1(1:5))
 hold on
-plot(T_blayer2)
+plot(T_blayer2(1:5))
 hold on
-plot(T_blayer3)
+plot(T_blayer3(1:5))
 hold on
 plot(baseline, '--')
-legend('front', '60 mm','20 mm','40 mm','70 C')
+legend('front', 'back', 'layer 1 back','layer 2 back','layer 3 back', '70 C')
 set(gcf,'color','w');
-
-%%
-figure(2)
-plot(time_integ(1:100), T_front(1:100))
-
