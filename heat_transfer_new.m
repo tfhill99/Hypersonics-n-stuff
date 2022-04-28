@@ -1,10 +1,33 @@
 n = 500; %discretization
 R_N = 0.272; %m
 
-thickness = [0.002, 0.002, 0.02, 0.02]; %m
-total_thickness = sum(thickness); %m
-alphas = [alpha_Rescor311, alpha_Rescor310M, alpha_Rescor310M, alpha_Rescor310M]; % m^2/s
-lambdas = [lambda_Rescor311, lambda_Rescor310M, lambda_Rescor310M, lambda_Rescor310M]; %W/m/K
+% thickness_rigid = [0.0015 0.025 0.03, 0.0015 0 0 0 0];
+% thickness_flexible = [0 0 0 0 0.00029 0.0055 0.00020 0.00029];
+thickness_rigid = [0 0 0 0];
+thickness_flexible = [0.00125 0.00125 0.00125 0.00125];
+total_thickness = sum(thickness_rigid) + sum(thickness_flexible); %m
+%alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12, alpha_nextel, alpha_pyrogel, alpha_sigratherm, alpha_nextel]; % m^2/s
+%lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12, lambda_nextel, lambda_pyrogel, lambda_sigratherm, lambda_nextel]; %W/m/K
+alphas = [alpha_sigratherm alpha_sigratherm alpha_sigratherm alpha_sigratherm]; % m^2/s
+lambdas = [lambda_sigratherm lambda_sigratherm lambda_sigratherm lambda_sigratherm]; %W/m/K
+
+SA = 4.3565e+06/1e+06 - 1.8385;
+a = sqrt(0.07*(2*R_N-0.07));
+CapSA =  pi*(a^2 + 0.07^2);
+ConeSA = SA - CapSA;
+%rho_rigid = [2900 800 6.4 2900 0 0 0 0];
+%rho_flexible = [0 0 0 0 2700 112 92 2700];
+rho_rigid = [0 0 0 0];
+rho_flexible = [92 92 92 92];
+mass_rigid = [];
+mass_flexible = [];
+for i = 1:length(thickness_rigid)
+   mass_rigid(i) = thickness_rigid(i)*rho_rigid(i)*CapSA;
+   mass_flexible(i) = thickness_flexible(i)*rho_flexible(i)*ConeSA;
+end
+mass_sum_rigid = sum(mass_rigid);
+mass_sum_flexible = sum(mass_flexible);
+%ratioMass;
 
 eps = 0.9; 
 sigma = 5.6695e-8;
@@ -15,10 +38,10 @@ sizes = zeros(4,1);
 indices = zeros(4,1);
 current_pos = 0;
 
-for i= 1:length(thickness)
-    cumthick = cumthick + thickness(i);
+for i= 1:length(thickness_rigid)
+    cumthick = cumthick + thickness_rigid(i) + thickness_flexible(i);
     cum_thickness(i) = cumthick;
-    current_pos = thickness(i)/total_thickness*n;
+    current_pos = (thickness_rigid(i) + thickness_flexible(i))/total_thickness*n;
     sizes(i) = round(current_pos);
     indices(i) = sum(sizes);
 end
