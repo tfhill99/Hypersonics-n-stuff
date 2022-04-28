@@ -1,4 +1,4 @@
-n = 100; %discretization
+n = 200; %discretization
 R_N = 0.272; %m
 
 thickness = [0.005, 0.02, 0.02, 0.005]; %thickness in m
@@ -98,6 +98,7 @@ T_back = [];
 T_blayer1 = [];
 T_blayer2 = [];
 T_blayer3 = [];
+T_thickness = {};
 at_stagnation = true;
 
 qw_integ = []; 
@@ -142,6 +143,9 @@ for idx=1:integration_len
     end
 
     T = A_total\transpose(q);
+    if mod(idx,100) == 0
+        T_thickness{idx/100} = T;
+    end
     T_front(idx) = T(1);
     T_blayer1(idx) = T(indices(1)); 
     T_blayer2(idx) = T(indices(2)); 
@@ -164,14 +168,12 @@ for idx=1:integration_len
     end
 end
 
-%% Plotting
+%% Plotting along time
 
 baseline = ones(1,length(T_front))*(70+273.15); %back wall
 opT = ones(1,length(T_front))*(2000); %front wall
 figure(1)
 plot(time_integ,T_front)
-hold on
-plot(time_integ,T_back)
 hold on
 plot(time_integ,T_blayer1)
 hold on
@@ -179,13 +181,39 @@ plot(time_integ,T_blayer2)
 hold on
 plot(time_integ,T_blayer3)
 hold on
-plot(baseline, '--')
+plot(time_integ,T_back)
 hold on
-plot(opT, '--')
+plot(opT, '--','LineWidth',1)
+hold on
+plot(baseline, '--','LineWidth',1)
 title('TPS Temperature over Flight Path')
 ylim([200 2100])
 xlim([0 time_integ(end)])
 ylabel('Temperature (K)')
 xlabel('Time (s)')
-legend('T_{front wall}', 'T_{back wall} (50 mm, FW12 + Rescor310M + Rescor311 + FW12)', 'T_{layer 1} (5 mm, FW12)','T_{layer 2} (25 mm, FW12 + Rescor310M)','T_{layer 3} (45 mm, (20 mm, FW12 + Rescor310M + Rescor311)', 'T_{payload}', 'T_{operational}')
+legend('T_{front wall}', 'T_{layer 1} (5 mm, FW12)','T_{layer 2} (25 mm, FW12 + Rescor310M)','T_{layer 3} (45 mm, FW12 + Rescor310M + Rescor311)', 'T_{back wall} (50 mm, FW12 + Rescor310M + Rescor311 + FW12)','T_{operational}', 'T_{payload}')
+set(gcf,'color','w');
+
+%% Plotting along thickness
+x = linspace(0, cumthick, n)*100;
+baseline_t = ones(1,length(x))*(70+273.15); %back wall
+figure(2)
+plot(x, T_thickness{1})
+hold on
+plot(x, T_thickness{10})
+hold on
+plot(x, T_thickness{30})
+hold on
+plot(x, T_thickness{50})
+hold on
+plot(x, T_thickness{100})
+hold on
+plot(x, T_thickness{246})
+hold on
+plot(x, baseline_t, '--', 'LineWidth',1)
+title('TPS Temperature across Thickness')
+ylabel('Temperature (K)')
+xlabel('Distance (mm)')
+xlim([0 cumthick*100])
+legend('t_{0 s}', 't_{41.1 s}','t_{123 s}','t_{205.5 s}', 't_{411.5 s}', 't_{1012 s}','T_{payload}')
 set(gcf,'color','w');
