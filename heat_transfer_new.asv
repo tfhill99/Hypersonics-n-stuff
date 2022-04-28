@@ -1,7 +1,7 @@
 n = 100; %discretization
 R_N = 0.272; %m
 
-thickness = [0.001, 0.001, 0.002, 0.002]; %thickness in m
+thickness = [0.005, 0.02, 0.02, 0.005]; %thickness in m
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_FW12]; % m^2/s
 lambdas = [lambda_FW12, lambda_Rescor310M, alpha_Rescor311, lambda_FW12]; %W/m/K
@@ -39,12 +39,10 @@ R_atmos = 287; %J/kg/K
 
 % flip trajectory
 Z_total = flip(Z_total)*1000; %convert to m
-P = flip(P);
 rho = flip(rho);
 T = flip(T); 
 
 T_traj = interp1(Z_total, T, Z);
-P_traj = interp1(Z_total, P, Z);
 rho_traj = interp1(Z_total, rho, Z);
 
 r = 0.71; 
@@ -84,14 +82,17 @@ end
 for i= 1:length(sizes)-1
     b  = 1/2*alphas(i)*dt/(dx^2);
     b_next = 1/2*alphas(i+1)*dt/(dx^2);
-    A_total(indices(i),indices(i)+1) = -b;
-    A_total(indices(i)+1,indices(i)) = -b;
+    %b_avg = 0.5*(b+b_next);
+    %A_total(indices(i)-1,indices(i)) = -b_avg;
+    %A_total(indices(i),indices(i)-1) = -b_avg;
+    A_total(indices(i),indices(i)+1) = -b_next;
+    A_total(indices(i)+1,indices(i)) = -b_next;
     A_total(indices(i), indices(i)) = 1 + b + b_next; 
 end
 
 %%
 n = length(A_total);
-T = ones(n,1)*360; %K initial atmospheric temperature at 120 km across traj
+T = ones(n,1)*343; %K initial atmospheric temperature at 120 km across traj
 T_front = [];
 T_back = [];
 T_blayer1 = [];
@@ -151,7 +152,7 @@ for idx=1:integration_len
         if idx ~= integration_len
             N = 0.5; 
             M = 3; 
-            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
+            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/2) * (1 - (T_front(idx))/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
         end
     else 
         if idx ~= integration_len
@@ -165,18 +166,26 @@ end
 
 %% Plotting
 
-baseline = ones(1,length(T_front(1:5)))*(70+273.15); %back wall
+baseline = ones(1,length(T_front))*(70+273.15); %back wall
+opT = ones(1,length(T_front))*(2000); %front wall
 figure(1)
-plot(T_front(1:5))
+plot(time_integ,T_front)
 hold on
-plot(T_back(1:5))
+plot(time_integ,T_back)
 hold on
-plot(T_blayer1(1:5))
+plot(time_integ,T_blayer1)
 hold on
-plot(T_blayer2(1:5))
+plot(time_integ,T_blayer2)
 hold on
-plot(T_blayer3(1:5))
+plot(time_integ,T_blayer3)
 hold on
 plot(baseline, '--')
-legend('front', 'back', 'layer 1 back','layer 2 back','layer 3 back', '70 C')
+hold on
+plot(opT, '--')
+title('TPS Temperature over Flight Path')
+ylim([200 2100])
+xlim([0 time_integ(end)])
+ylabel('Temperature (K)')
+xlabel('Time (s)')
+legend('T_{front wall}', 'T_{back wall} (50 mm, FW12 + Rescor310M + Rescor311 + FW12)', 'T_{layer 1} (5 mm, FW12)','T_{layer 2} (25 mm, FW12 + Rescor310M)','T_{layer 3} (45 mm, (20 mm, FW12 + Rescor310M + Rescor311)', 'T_{payload}', 'T_{operational}')
 set(gcf,'color','w');
