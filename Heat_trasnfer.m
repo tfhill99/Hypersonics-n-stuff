@@ -3,10 +3,27 @@ n = 100; %discretization
 
 R_N = 0.272; %m
 
-thickness = [0.001, 0.001, 0.001, 0.001, 0.001, 0.0005, 0.0005];
-total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
-lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
+thickness_rigid = [0.0015, 0.025, 0.03, 0.0015 0 0 0 0];
+thickness_flexible = [0 0 0 0 0.000025 0.005 0.005 0.000025];
+total_thickness = sum(thickness_rigid) + sum(thickness_flexible); %m
+alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; % m^2/s
+lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12]; %W/m/K
+
+SA = 4.3565e+06/1e+06;
+a = sqrt(0.07*(2*R_N-0.07));
+CapSA =  pi*(a^2 + 0.07^2);
+ConeSA = SA - CapSA;
+rho_rigid = [2900 800 6.4 2900 0 0 0 0];
+rho_flexible = [0 0 0 0 2700 92 92 2700];
+mass_rigid = [];
+mass_flexible = [];
+for i = 1:length(thickness_rigid)
+   mass_rigid(i) = thickness_rigid(i)*rho_rigid(i)*CapSA;
+   mass_flexible(i) = thickness_flexible(i)*rho_flexible(i)*ConeSA;
+end
+mass_sum_rigid = sum(mass_rigid);
+mass_sum_flexible = sum(mass_flexible);
+%ratioMass;
 
 eps = 0.9; 
 sigma = 5.6695e-8;
@@ -20,16 +37,18 @@ T_aw = T_aw_TM_stag(1:12000);
 at_stagnation = true; 
 
 cumthick = 0;
-cum_thickness = ones(7,1);
-sizes = zeros(7,1);
-indices = zeros(7,1);
+cum_thickness = ones(8,1);
+sizes = zeros(8,1);
+indices = zeros(8,1);
 current_pos = 0;
 
-for i= 1:length(thickness)
-    cumthick = cumthick + thickness(i);
+for i= 1:length(thickness_rigid)
+    cumthick = cumthick + thickness_rigid(i) + thickness_flexible(i);
     cum_thickness(i) = cumthick;
-    current_pos = thickness(i)/total_thickness*n;
-    sizes(i) = round(current_pos);
+    current_pos = (thickness_rigid(i) + thickness_flexible(i))/total_thickness*n;
+    % what is purpose of current_pos, should it not track the current
+    % location in the TPS? rn it just relative thickness percent
+    sizes(i) = round(current_pos); %dont want to be < 0.5, the its 0
     indices(i) = sum(sizes);
 end
 
@@ -65,10 +84,8 @@ end
 
 for i= 1:length(sizes)-1
     b  = 1/2*alphas(i)*dt/(dx^2);
-    b_trans = 1/2*alphas(i+1)*dt/(dx^2);
     A_total(indices(i),indices(i)+1) = -b;
     A_total(indices(i)+1,indices(i)) = -b;
-    A_total(indices(i),indices(i)) = 1 + b + b_trans;
 end
 %%
 n = length(A_total);
