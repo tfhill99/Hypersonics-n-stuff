@@ -1,10 +1,10 @@
-n = 100; %discretization
+n = 500; %discretization
 R_N = 0.272; %m
 
-thickness = [0.002, 0.02, 0.01, 0.001];
+thickness = [0.02, 0.02, 0.02, 0.02];
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; % m^2/s
-lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12]; %W/m/K
+alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_Rescor311]; % m^2/s
+lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_Rescor311]; %W/m/K
 
 eps = 0.9; 
 sigma = 5.6695e-8;
@@ -56,7 +56,7 @@ T_aw = T_traj + r*V.^2/(2*cp);
 %% Setup integration parameters 
 
 dx = total_thickness/n;
-dt = 0.9*0.5*dx^2/max(alphas); 
+dt = 0.01; %0.9*0.5*dx^2/max(alphas); 
 
 total_time = time(length(time));
 integration_len = round(total_time/dt);
@@ -94,8 +94,9 @@ n = length(A_total);
 T = ones(n,1)*225; %K initial atmospheric temperature at 120 km across traj
 T_front = [];
 T_back = [];
-T_13 = []; 
-T_23 = []; 
+T_blayer1 = [];
+T_blayer2 = [];
+T_blayer3 = [];
 at_stagnation = true;
 
 qw_integ = []; 
@@ -141,8 +142,9 @@ for idx=1:integration_len
 
     T = A_total\transpose(q);
     T_front(idx) = T(1);
-    T_13(idx) = T(round(n/3)); 
-    T_23(idx) = T(round(2*n/3)); 
+    T_blayer1(idx) = T(indices(1)); 
+    T_blayer2(idx) = T(indices(2)); 
+    T_blayer3(idx) = T(indices(3)); 
     T_back(idx) = T(n);
 
     if at_stagnation
@@ -156,7 +158,7 @@ for idx=1:integration_len
             curvilinear_abscissa = 0.56; 
             N = 0.5; 
             M = 3.2;
-            qw_integ(idx+1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M; 
+            qw_integ(idx + 1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M; 
         end
     end
 end
@@ -169,11 +171,17 @@ plot(T_front)
 hold on
 plot(T_back)
 hold on
-plot(T_13)
+plot(T_blayer1)
 hold on
-plot(T_23)
+plot(T_blayer2)
+hold on
+plot(T_blayer3)
 hold on
 plot(baseline, '--')
 legend('front', '60 mm','20 mm','40 mm','70 C')
 set(gcf,'color','w');
+
+%%
+figure(2)
+plot(time_integ(1:100), T_front(1:100))
 

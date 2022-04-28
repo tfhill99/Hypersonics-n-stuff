@@ -1,7 +1,7 @@
-n = 100; %discretization
+n = 500; %discretization
 R_N = 0.272; %m
 
-thickness = [0.002, 0.02, 0.01, 0.001];
+thickness = [0.02, 0.02, 0.02, 0.02];
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_Rescor311]; % m^2/s
 lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_Rescor311]; %W/m/K
@@ -10,7 +10,7 @@ eps = 0.9;
 sigma = 5.6695e-8;
 
 cumthick = 0;
-cum_thickness = ones(4,1);
+cum_thickness = zeros(4,1);
 sizes = zeros(4,1);
 indices = zeros(4,1);
 current_pos = 0;
@@ -56,7 +56,7 @@ T_aw = T_traj + r*V.^2/(2*cp);
 %% Setup integration parameters 
 
 dx = total_thickness/n;
-dt = 0.9*0.5*dx^2/max(alphas); 
+dt = 0.01; %0.9*0.5*dx^2/max(alphas); 
 
 total_time = time(length(time));
 integration_len = round(total_time/dt);
@@ -94,8 +94,9 @@ n = length(A_total);
 T = ones(n,1)*225; %K initial atmospheric temperature at 120 km across traj
 T_front = [];
 T_back = [];
-T_13 = []; 
-T_23 = []; 
+T_blayer1 = [];
+T_blayer2 = [];
+T_blayer3 = [];
 at_stagnation = true;
 
 qw_integ = []; 
@@ -141,8 +142,9 @@ for idx=1:integration_len
 
     T = A_total\transpose(q);
     T_front(idx) = T(1);
-    T_13(idx) = T(round(n/3)); 
-    T_23(idx) = T(round(2*n/3)); 
+    T_blayer1(idx) = T(indices(1)); 
+    T_blayer2(idx) = T(indices(2)); 
+    T_blayer3(idx) = T(indices(3)); 
     T_back(idx) = T(n);
 
     if at_stagnation
@@ -169,16 +171,17 @@ plot(T_front)
 hold on
 plot(T_back)
 hold on
-plot(T_13)
+plot(T_blayer1)
 hold on
-plot(T_23)
+plot(T_blayer2)
+hold on
+plot(T_blayer3)
 hold on
 plot(baseline, '--')
-legend('front', '60 mm','20 mm','40 mm','70 C')
+legend('front', 'back', 'layer 1 back','layer 2 back','layer 3 back', '70 C')
 set(gcf,'color','w');
 
 %%
 figure(2)
-
 plot(time_integ(1:100), T_front(1:100))
 
