@@ -1,10 +1,20 @@
-n = 200; %discretization
+function[temperatures] = heat_transfer_new(thickness)
+
+n = 300; %discretization  % 100-400 for rigid, 300 for flexible
 R_N = 0.272; %m
 
-thickness = [0.005, 0.02, 0.02, 0.005]; %thickness in m
+%% Rigid TPS Materials
+[alpha_FW12, alpha_Rescor310M, ~, alpha_Intek1120, ~, ~, ~, lambda_FW12, lambda_Rescor310M, ~, lambda_Intek1120, ~, ~, ~] = TPS_materials();
+%% Flexible TPS Materials
+[~, ~, ~ , ~, alpha_nextel, alpha_pyrogel, alpha_sigratherm, ~, ~, ~, ~, lambda_nextel, lambda_pyrogel, lambda_sigratherm] = TPS_materials();
+
+%%
+%thickness = [0.003, 0.003, 0.04, 0.002]; %thickness in m
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_FW12]; % m^2/s
-lambdas = [lambda_FW12, lambda_Rescor310M, alpha_Rescor311, lambda_FW12]; %W/m/K
+alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; %m^2/s RIGID
+lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12];%W/m/K RIGID
+%alphas = [alpha_nextel, alpha_pyrogel, alpha_sigratherm, alpha_nextel]; % FLEXIBLE
+%lambdas = [lambda_nextel, lambda_pyrogel, lambda_sigratherm, lambda_nextel]; % FLEXIBLE
 
 eps = 0.9; 
 sigma = 5.6695e-8;
@@ -22,6 +32,7 @@ for i= 1:length(thickness)
     sizes(i) = round(current_pos);
     indices(i) = sum(sizes);
 end
+cumthick %display new cumthick each iteration
 
 traj = table2array(readtable('OptimizedPathDatabase.xlsx'));
 time = traj(3:end,1);
@@ -35,14 +46,14 @@ gamma_r = traj(3:end,8);
 gamma_atmos = 1.4; 
 R_atmos = 287; %J/kg/K
 
-[Z_total, Z_L, Z_U, T, P, rho, c, g_atmos, mu, nu, k, n_eh, n_sum]  = atmo(120, 0.01, 1);
+[Z_total, Z_L, Z_U, Temp, P, rho, c, g_atmos, mu, nu, k, n_eh, n_sum]  = atmo(120, 0.01, 1);
 
 % flip trajectory
 Z_total = flip(Z_total)*1000; %convert to m
 rho = flip(rho);
-T = flip(T); 
+Temp = flip(Temp); 
 
-T_traj = interp1(Z_total, T, Z);
+T_traj = interp1(Z_total, Temp, Z);
 rho_traj = interp1(Z_total, rho, Z);
 
 r = 0.71; 
@@ -92,14 +103,23 @@ end
 
 %%
 n = length(A_total);
-T = ones(n,1)*343; %K initial atmospheric temperature at 120 km across traj
+%T = ones(n,1); %K initial atmospheric temperature at 120 km across traj
+%T = T_traj;
+T = [n, 1];
+T(1) = T_traj(1);
+for i = 2:n-1
+    T(i) = T_traj(fix(length(T_traj)/n)*i);
+end
+T(n) = T_traj(n);
+
 T_front = [];
 T_back = [];
 T_blayer1 = [];
 T_blayer2 = [];
 T_blayer3 = [];
 T_thickness = {};
-at_stagnation = true;
+
+at_stagnation = true; % toggle for rigid=true, flexible=false
 
 qw_integ = []; 
 
@@ -111,7 +131,7 @@ else
     curvilinear_abscissa = 0.56; 
     N = 0.5; 
     M = 3.2;
-    qw_integ(1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T(1)/T_aw_integ(1)) * rho_integ(1)^N * V_integ(1)^M; 
+    qw_integ(1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T(1)/T_aw_integ(1)) * rho_integ(1)^N * V_integ(1)^M - 100; 
 end
 
 for idx=1:integration_len
@@ -146,10 +166,10 @@ for idx=1:integration_len
     if mod(idx,100) == 0
         T_thickness{idx/100} = T;
     end
-    T_front(idx) = T(1);
+    T_front(idx) = T(1);;
     T_blayer1(idx) = T(indices(1)); 
-    T_blayer2(idx) = T(indices(2)); 
-    T_blayer3(idx) = T(indices(3)); 
+    T_blayer2(idx) = T(round((indices(2)-indices(1))/2) + indices(1)); 
+    T_blayer3(idx) = T(round((indices(3)-indices(2))/2) + indices(2)); 
     T_back(idx) = T(n);
 
     if at_stagnation
@@ -160,13 +180,15 @@ for idx=1:integration_len
         end
     else 
         if idx ~= integration_len
-            curvilinear_abscissa = 0.56; 
+            curvilinear_abscissa = 0.56;
             N = 0.5; 
             M = 3.2;
-            qw_integ(idx + 1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M; 
+            qw_integ(idx + 1) = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * curvilinear_abscissa^(-1/2) * (1 - T_front(idx)/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M - 100; 
         end
     end
 end
+
+temperatures = [max(T_blayer1); max(T_blayer2); max(T_blayer3); max(T_back)];
 
 %% Plotting along time
 
@@ -191,11 +213,11 @@ ylim([200 2100])
 xlim([0 time_integ(end)])
 ylabel('Temperature (K)')
 xlabel('Time (s)')
-legend('T_{front wall}', 'T_{layer 1} (5 mm, FW12)','T_{layer 2} (25 mm, FW12 + Rescor310M)','T_{layer 3} (45 mm, FW12 + Rescor310M + Rescor311)', 'T_{back wall} (50 mm, FW12 + Rescor310M + Rescor311 + FW12)','T_{operational}', 'T_{payload}')
+legend('T_{front wall}', 'T_{layer 1} (FW12)','T_{layer 2} (FW12 + Rescor310M)','T_{layer 3} (FW12 + Rescor310M + Intek1120)', 'T_{back wall} (FW12 + Rescor310M + Intek1120 + FW12)','T_{operational}', 'T_{payload}', 'FontSize', 7)
 set(gcf,'color','w');
 
 %% Plotting along thickness
-x = linspace(0, cumthick, n)*100;
+x = linspace(0, cumthick, n)*1000;
 baseline_t = ones(1,length(x))*(70+273.15); %back wall
 figure(2)
 plot(x, T_thickness{1})
@@ -208,12 +230,32 @@ plot(x, T_thickness{50})
 hold on
 plot(x, T_thickness{100})
 hold on
-plot(x, T_thickness{246})
+plot(x, T_thickness{length(T_thickness)})
 hold on
 plot(x, baseline_t, '--', 'LineWidth',1)
 title('TPS Temperature across Thickness')
 ylabel('Temperature (K)')
 xlabel('Distance (mm)')
-xlim([0 cumthick*100])
+xlim([0 cumthick*1000])
 legend('t_{0 s}', 't_{41.1 s}','t_{123 s}','t_{205.5 s}', 't_{411.5 s}', 't_{1012 s}','T_{payload}')
 set(gcf,'color','w');
+
+%% plotting materials vs thickness
+x = linspace(0, cumthick, n)*1000;
+baseline_t = ones(1,length(x))*(70+273.15); %back wall
+figure(3)
+plot(0, max(T_front),'*')
+hold on
+plot(thickness(1)*1000, max(T_blayer1), '*')
+plot((thickness(1) + thickness(2))*1000, max(T_blayer2), '*')
+plot((thickness(1) + thickness(2) + thickness(3))*1000, max(T_blayer3), '*')
+plot((thickness(1) + thickness(2) + thickness(3) + thickness(4))*1000, max(T_back), '*')
+title('TPS Temperature across Thickness')
+ylabel('Temperature (K)')
+xlabel('Distance (mm)')
+xlim([0 cumthick*1000])
+legend('t_{front}', 't_{1}','t_{2}','t_{3}', 't_{back}')
+set(gcf,'color','w');
+
+
+end
