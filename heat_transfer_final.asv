@@ -219,35 +219,29 @@ set(gcf,'color','w');
 x = linspace(0, cumthick, n)*1000;
 baseline_t = ones(1,length(x))*(70+273.15); %back wall
 indices = [];
-labels = {};
-for i = 1:6
-    indices(i) = floor(i*length(T_thickness)/12);
-    time = indices(i)/length(T_thickness) * total_time;
-    labels{i} = ['t_{' num2str(time) ' s}'];
+for i = 1:5
+    indices(i) = floor(i*length(T_thickness)/5);
 end
-labels{7} = ['t_{' num2str(dt) ' s}'];
 %% Plotting along thickness
 figure(2)
 plot(x, T_thickness{1})
 hold on
-plot(x, T_thickness{indices(1)})
+plot(x, T_thickness{inidices(1)})
 hold on
-plot(x, T_thickness{indices(2)})
+plot(x, T_thickness{inidices(2)})
 hold on
-plot(x, T_thickness{indices(3)})
+plot(x, T_thickness{inidices(3)})
 hold on
-plot(x, T_thickness{indices(4)})
+plot(x, T_thickness{inidices(4)})
 hold on
-plot(x, T_thickness{indices(5)})
-hold on
-plot(x, T_thickness{indices(6)})
+plot(x, T_thickness{inidices(5)})
 hold on
 plot(x, baseline_t, '--', 'LineWidth',1)
 title('TPS Temperature across Thickness')
 ylabel('Temperature (K)')
 xlabel('Distance (mm)')
 xlim([0 cumthick*1000])
-legend(labels{7}, labels{1},labels{2},labels{3},labels{4},labels{5},labels{6},'T_{payload}')
+legend('t_{0 s}', 't_{41.1 s}','t_{123 s}','t_{205.5 s}', 't_{411.5 s}', 't_{1012 s}','T_{payload}')
 set(gcf,'color','w');
 
 %% plotting materials vs thickness
