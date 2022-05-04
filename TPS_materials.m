@@ -1,5 +1,4 @@
-clear all 
-close all
+function[alpha_FW12, alpha_Rescor310M, alpha_Rescor311, alpha_Intek1120, alpha_nextel, alpha_sigratherm, alpha_pyrogel, lambda_FW12, lambda_Rescor310M, lambda_Rescor311, lambda_Intek1120, lambda_nextel, lambda_sigratherm, lambda_pyrogel] = TPS_materials()
 
 max_weight = 8.5; % kg
 max_surface_temp = 70; % °C
@@ -35,7 +34,7 @@ alpha_Intek1120 = lambda_Intek1120/(rho_Intek1120*c_Intek1120);
 
 rho_nextel = 2700; % kg/m^3
 rho_sigratherm = 92; % kg/m^3
-rho_pyrogel = 92; % kg/m^3
+rho_pyrogel = 112; % kg/m^3
 
 c_nextel = 1046.7; % J/K*kg
 c_sigratherm = 700; % J/K*kg
@@ -61,4 +60,6 @@ lambda_pyrogel = mean(lambdas_pyrogel); % W/(K*m)
 alpha_nextel = lambda_nextel/(rho_nextel*c_nextel);
 alpha_sigratherm = lambda_sigratherm/(rho_sigratherm*c_sigratherm);
 alpha_pyrogel = lambda_pyrogel/(rho_pyrogel*c_pyrogel);
+
+end
 
