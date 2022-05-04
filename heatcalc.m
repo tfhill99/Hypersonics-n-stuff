@@ -63,26 +63,38 @@ C_p0 = 2./(gamma*M1.^2).*(P2_P1 .* Pstag_P2-1);
 %% Calculate wall temperature using TM at stagnation point (re-radiation = convec + rad)
 R_N = 0.272; %m
 r = 0.71^0.5; %laminar flow
-T_aw = T_traj + r*V.^2./(2*C_p0);
+R_H_NS_factor = ((gamma_atmos + 1) * Mach.^2)./(2 + (gamma_atmos - 1)*Mach.^2); 
+V_NS = V./R_H_NS_factor; 
+T_aw = T_traj + r*V_NS.^2/(2*1.4);
+T_aw_2 = T_traj + r*V.^2/(2*1.4); 
 
 A_q = 1.83e-4 * R_N^(-1/2) * rho_traj.^(1/2) .* V.^(3); 
 B_q = A_q ./ T_aw; 
+B_q_2 = A_q ./ T_aw_2; 
 
 sigma = 5.6695e-8; 
 eps = 0.9; 
 
 T_w_TM = []; 
+T_w_TM_2 = []; 
 
 for i = 1:length(T_aw)
     func_haha = [1 0 0 B_q(i)/(eps*sigma) -1*A_q(i)/(eps*sigma)]; 
     rn = roots(func_haha); 
     temp = rn(rn == real(rn)); 
     T_w_TM(i) = temp(temp > 0);
+
+    func_haha = [1 0 0 B_q_2(i)/(eps*sigma) -1*A_q(i)/(eps*sigma)]; 
+    rn = roots(func_haha); 
+    temp = rn(rn == real(rn)); 
+    T_w_TM_2(i) = temp(temp > 0);
 end
 
 
 figure(1)
-plot(T_w_TM, Z/1000); 
+plot(T_w_TM, Z/1000);
+hold on
+plot(T_w_TM_2, Z/1000); 
 xlabel('T_w (K)'); 
 ylabel('Altitude(km)');
 title('Tauber Menees Wall Temperature at Stagnation Point');
@@ -93,10 +105,14 @@ M = 3;
 
 C = []; 
 q_w_stag_TM = []; 
+q_w_stag_TM_2 = []; 
 
 for i = 1:length(T_aw)
     C(i) = 1.83e-4 * R_N^(-1/2) * (1 - T_w_TM(i)/T_aw(i)); 
     q_w_stag_TM(i) = C(i) * rho_traj(i)^N * V(i)^M; 
+
+    C2 = 1.83e-4 * R_N^(-1/2) * (1 - T_w_TM_2(i)/T_aw_2(i)); 
+    q_w_stag_TM_2(i) = C2 * rho_traj(i)^N * V(i)^M; 
 end
 
 figure(2)
@@ -107,6 +123,8 @@ title('Tauber Menees q_w at Stagnation');
 
 figure(3)
 plot(time(1:12000), q_w_stag_TM(1:12000)/1000); 
+hold on
+plot(time(1:12000), q_w_stag_TM_2(1:12000)/1000);
 ylabel('q_w (kW/m^2)'); 
 xlabel('Time (s)');
 title('Time History of Stagnation q_w Using Tauber Menees');
@@ -163,7 +181,7 @@ vect_indices_3 = find(pts(:,1) > 0);
 %[vect_indices, eh] = intersect(vect_indices, vect_indices_4); 
 
 
-for i = 1:length(V)
+for i = 1:7
     V_mag = V(i); 
     alpha = alpha_r(i);
 
@@ -183,6 +201,15 @@ for i = 1:length(V)
     T_w = []; 
     T_aw = []; 
 
+    disp(i)
+
+    T_aw_test = []; 
+    T_w_test = []; 
+
+    F_val = []; 
+
+    F_test =[]; 
+
     for j = 1:length(F)
         N = F(j, :); 
         sin_theta = sum((V_vec.*N)/V_mag); 
@@ -192,7 +219,28 @@ for i = 1:length(V)
         else
             C_p(j) = C_p0(i) * sin_theta^2; 
         end
-        T_aw(j) = T_traj(i) + r*V_mag^2/(2*C_p(j));
+
+        RH_factor = ((gamma_atmos + 1) * Mach_new(i)^2)/(2 + (gamma_atmos - 1)*Mach(i)^2);
+
+%         beta = obliquerelations('mach', Mach_new(i), 'theta', pi/4, 1.4); 
+%         disp(rad2deg(beta))
+
+        beta = deg2rad(64.2); 
+
+        v_n = V_mag * sin(beta); 
+        v_t = V_mag * cos(beta); 
+
+        v_n2 = v_n/RH_factor; 
+
+        V_mag_new = norm([v_t, v_n2]); 
+
+
+        if i < 9
+            T_aw(j) = T_traj(i) + r*V_mag_new^2/(2*1.4);
+            T_aw_test(j) = T_traj(i) + r*V_mag^2/(2*1.4);
+        else
+            T_aw(j) = T_traj(i) + r*V_mag^2/(2*1.4);
+        end
 
         B_q = A_q / T_aw(j); 
 
@@ -201,7 +249,21 @@ for i = 1:length(V)
         temp = rn(rn == real(rn)); 
         T_w(j) = temp(temp > 0);
 
+        F_val(j) = 1 - T_w(j)/T_aw(j); 
+
+        B_q = A_q / T_aw_test(j); 
+
+        func_haha = [1 0 0 B_q/(eps*sigma) -1*A_q/(eps*sigma)]; 
+        rn = roots(func_haha); 
+        temp = rn(rn == real(rn)); 
+        T_w_test(j) = temp(temp > 0);
+
+        F_test(j) = 1 - T_w_test(j)/T_aw_test(j); 
+
+
     end
+
+    disp(V_mag_new)
 
     broad_local_alpha{i} = local_alphas; 
     broad_local_C_p{i} = C_p; 
@@ -272,8 +334,6 @@ for i = 1:length(V)
         phi = abs(atan(abs(p2(1))/(p2(3)-291)));
        
         if phi < pi/4 
-            disp(rad2deg(phi)); 
-            disp(lc2); 
             cross_sec_qw(lc2) = q_w_stag_TM_new(i) * (a * cos(phi)^1.5 + b); 
             x_dist_plot(lc2) = phi/(2*pi) * (2 * pi * 0.272); 
             last_index = lc2; 
