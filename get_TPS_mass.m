@@ -1,11 +1,8 @@
 function [mass, total_mass] = get_TPS_mass(thicknesses, tps_type)
-%thickness = [0.0005 0.0098 0.0459 0.0005]; % Rigid optimized
-% produces mass of 1.8519kg w/out safety factor, thickness of 0.0567
-%thicknesses = [0.00025 0.0092 0.028 0.00032]; % Flexible optimized
-%thicknesses = [0.00035 0.01 0.001 0.00025]; %within mass 5.4550
-%thicknesses = [0.0004 0.005 0.004 0.00025];
-%produces mass of 11.6752kg w/out safety factor
-%thicknesses = [0.003 0.04 0.025 .002]; 11.3254kg (what the grads have LOL)
+%thicknesses = [0.005 0.03 0.02 0.005]; %12.9974kg for rigid (what the grads have for optimized...)
+%thicknesses = [0.000656 0.010 0.070	0.000656]; %@ time = 500s rigid optimized
+%thicknesses = [0.00027 0.006 0.020 0.00025]; % 6.1516 @time = 500s flexible optimized
+%thicknesses = [0.00025 0.005 0.0174 0.00025]; % 5.4980 kg for flexible, not converged
 %tps_type = 'R';
 
 mass = []; 
@@ -22,13 +19,6 @@ rho_pyrogel = 112; % kg/m^3
 R_N = 0.272; %m
 R_B = 0.765; %m
 
-% TR = stlread('CAD_capsule_3.stl');
-% points = TR.Points(find(TR.Points(:,3)==493),:);
-% max_h = max(TR.Points(:,3));
-% cone_start = 493;
-% h = max_h-cone_start;
-% left_lim = max(points(:,2));
-%right_lim = min(points(:,2));
 
 if tps_type == 'R'
     densities = [rho_FW12, rho_Rescor310M, rho_Intek1120, rho_FW12];
@@ -44,11 +34,11 @@ if tps_type == 'R'
     h_new = 0;
     a_new = 0;
 
+    flip(thicknesses);
     for i = 1:length(thicknesses)
         thickness = thicknesses(i);
         h_new = h + thickness;
         a_new = a + thickness;
-        %V_new = (((pi*h_new^2)/3)*(3*r_new-h_new))*1e-9;
         V_new = (1/6)*pi*h_new*(3*a_new^2 + h_new^2);
         mass(i) = (V_new-V)*densities(i);
         V = V_new;
@@ -71,8 +61,9 @@ elseif tps_type == 'F'
     r1_new = 0;
     r2_new = 0;
 
+    flip(thicknesses);
     for i = 1:length(thicknesses)
-        thickness = thicknesses(i);
+        thickness = thicknesses(i)*cos(pi/4);
         r1_new = r1 + thickness;
         r2_new = r2 + thickness;
         V_new = (1/3)*pi*(r1_new^2 + r1_new*r2_new + r2_new^2)*h;
@@ -93,16 +84,3 @@ end
 
 
 end
-%% calculate mass of rigid
-% SA = 4.3565e+06/1e+06 - 1.8385;
-% a = sqrt(0.07*(2*R_N-0.07));
-% CapSA =  pi*(a^2 + 0.07^2);
-% %ConeSA = SA - CapSA;
-% rho_rigid = [2900 800 6.4 2900];
-% mass_rigid = [];
-% %mass_flexible = [];
-% for i = 1:length(thickness)
-%    mass_rigid(i) = thickness(i)*rho_rigid(i)*CapSA;
-%    %mass_flexible(i) = thickness_flexible(i)*rho_flexible(i)*ConeSA;
-% end
-% mass_sum_rigid = sum(mass_rigid);
