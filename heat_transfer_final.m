@@ -1,6 +1,6 @@
 function[temperatures] = heat_transfer_final(thickness)
 
-n = 300; %discretization  % 100-400 for rigid, 300 for flexible
+n = 300; %discretization  % 100-400 to run
 R_N = 0.272; %m
 
 %% Rigid TPS Materials
@@ -8,17 +8,20 @@ R_N = 0.272; %m
 %% Flexible TPS Materials
 [~, ~, ~ , ~, alpha_nextel, alpha_pyrogel, alpha_sigratherm, ~, ~, ~, ~, lambda_nextel, lambda_pyrogel, lambda_sigratherm] = TPS_materials();
 %%
-thickness = [0.005, 0.03, 0.02, 0.005]; %thickness in m
+%thickness = [0.003, 0.003, 0.04, 0.002]; %thickness in m
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; %m^2/s RIGID
 lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12];%W/m/K RIGID
 %alphas = [alpha_nextel, alpha_pyrogel, alpha_sigratherm, alpha_nextel]; % FLEXIBLE
 %lambdas = [lambda_nextel, lambda_pyrogel, lambda_sigratherm, lambda_nextel]; % FLEXIBLE
 
+%alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; %m^2/s RIGID
+%lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12];%W/m/K RIGID
+
 eps = 0.9; 
 sigma = 5.6695e-8;
 
-cumthick = 0;
+cumthick = 0; %cumulative
 cum_thickness = zeros(4,1);
 sizes = zeros(4,1);
 indices = zeros(4,1);
@@ -102,7 +105,8 @@ end
 
 %%
 n = length(A_total);
-T = ones(n,1)*343.15; %K initial atmospheric temperature at 120 km across traj
+T = ones(n,1) * 323; %K initial atmospheric temperature at 120 km across traj
+%temperature chosen as 50 degC, an estimate of starting temp
 
 T_front = [];
 T_back = [];
@@ -168,7 +172,7 @@ for idx=1:integration_len
         if idx ~= integration_len
             N = 0.5; 
             M = 3; 
-            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/2) * (1 - (T_front(idx))/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
+            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/3) * (1 - (T_front(idx))/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
         end
     else 
         if idx ~= integration_len
@@ -183,7 +187,6 @@ end
 temperatures = [max(T_blayer1); max(T_blayer2); max(T_blayer3); max(T_back)];
 
 %% Plotting along time
-
 baseline = ones(1,length(T_front))*(70+273.15); %back wall
 opT = ones(1,length(T_front))*(2000); %front wall
 figure(1)
@@ -202,12 +205,11 @@ hold on
 plot(baseline, '--','LineWidth',1)
 title('TPS Temperature over Flight Path')
 ylim([200 2100])
-xlim([0 time_integ(end)])
+xlim([0 500])
 ylabel('Temperature (K)')
 xlabel('Time (s)')
 legend('T_{front wall}', 'T_{layer 1} (FW12)','T_{layer 2} (FW12 + Rescor310M)','T_{layer 3} (FW12 + Rescor310M + Intek1120)', 'T_{back wall} (FW12 + Rescor310M + Intek1120 + FW12)','T_{operational}', 'T_{payload}', 'FontSize', 7)
 set(gcf,'color','w');
-
 %% Plotting parameters
 x = linspace(0, cumthick, n)*1000;
 baseline_t = ones(1,length(x))*(70+273.15); %back wall
@@ -235,7 +237,7 @@ plot(x, T_thickness{indices(5)})
 hold on
 plot(x, T_thickness{indices(6)})
 hold on
-plot(x, baseline_t, '--', 'LineWidth',1)
+plot(x, baseline_t, 'r--', 'LineWidth',1)
 title('TPS Temperature across Thickness')
 ylabel('Temperature (K)')
 xlabel('Distance (mm)')
@@ -259,5 +261,6 @@ xlabel('Distance (mm)')
 xlim([0 cumthick*1000])
 legend('t_{front}', 't_{1}','t_{2}','t_{3}', 't_{back}')
 set(gcf,'color','w');
+
 
 end
