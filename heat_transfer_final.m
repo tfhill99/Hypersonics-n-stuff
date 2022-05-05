@@ -8,7 +8,7 @@ R_N = 0.272; %m
 %% Flexible TPS Materials
 [~, ~, ~ , ~, alpha_nextel, alpha_pyrogel, alpha_sigratherm, ~, ~, ~, ~, lambda_nextel, lambda_pyrogel, lambda_sigratherm] = TPS_materials();
 %%
-%thickness = [0.003, 0.003, 0.04, 0.002]; %thickness in m
+thickness = [0.0005, 0.0098, 0.0495, 0.0005]; %thickness in m
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; %m^2/s RIGID
 lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12];%W/m/K RIGID
@@ -102,14 +102,7 @@ end
 
 %%
 n = length(A_total);
-%T = ones(n,1); %K initial atmospheric temperature at 120 km across traj
-%T = T_traj;
-T = [n, 1];
-T(1) = T_traj(1);
-for i = 2:n-1
-    T(i) = T_traj(fix(length(T_traj)/n)*i);
-end
-T(n) = T_traj(n);
+T = ones(n,1)*343.15; %K initial atmospheric temperature at 120 km across traj
 
 T_front = [];
 T_back = [];
