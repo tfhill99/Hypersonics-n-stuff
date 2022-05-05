@@ -10,10 +10,13 @@ R_N = 0.272; %m
 %%
 %thickness = [0.003, 0.003, 0.04, 0.002]; %thickness in m
 total_thickness = sum(thickness); %m
-alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; %m^2/s RIGID
-lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12];%W/m/K RIGID
+%alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; %m^2/s RIGID
+%lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12];%W/m/K RIGID
 %alphas = [alpha_nextel, alpha_pyrogel, alpha_sigratherm, alpha_nextel]; % FLEXIBLE
 %lambdas = [lambda_nextel, lambda_pyrogel, lambda_sigratherm, lambda_nextel]; % FLEXIBLE
+
+alphas = [alpha_FW12, alpha_FW12, alpha_FW12, alpha_FW12]; %m^2/s RIGID
+lambdas = [lambda_FW12, lambda_FW12, lambda_FW12, lambda_FW12];%W/m/K RIGID
 
 eps = 0.9; 
 sigma = 5.6695e-8;
@@ -175,7 +178,7 @@ for idx=1:integration_len
         if idx ~= integration_len
             N = 0.5; 
             M = 3; 
-            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/2) * (1 - (T_front(idx))/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
+            qw_integ(idx + 1) = 1.83e-4 * R_N^(-1/3) * (1 - (T_front(idx))/T_aw_integ(idx)) * rho_integ(idx)^N * V_integ(idx)^M;
         end
     else 
         if idx ~= integration_len
@@ -191,57 +194,52 @@ temperatures = [max(T_blayer1); max(T_blayer2); max(T_blayer3); max(T_back)];
 
 %% Plotting along time
 
-baseline = ones(1,length(T_front))*(70+273.15); %back wall
-opT = ones(1,length(T_front))*(2000); %front wall
+baseline = ones(1,length(T_front))*(33.64+273.15); %back wall
+opT = ones(1,length(T_front))*(1973); %front wall
 figure(1)
-plot(time_integ,T_front)
-hold on
 plot(time_integ,T_blayer1)
 hold on
-plot(time_integ,T_blayer2)
-hold on
-plot(time_integ,T_blayer3)
-hold on
-plot(time_integ,T_back)
-hold on
-plot(opT, '--','LineWidth',1)
-hold on
-plot(baseline, '--','LineWidth',1)
 title('TPS Temperature over Flight Path')
-ylim([200 2100])
+ylim([200 900])
 xlim([0 time_integ(end)])
 ylabel('Temperature (K)')
 xlabel('Time (s)')
-legend('T_{front wall}', 'T_{layer 1} (FW12)','T_{layer 2} (FW12 + Rescor310M)','T_{layer 3} (FW12 + Rescor310M + Intek1120)', 'T_{back wall} (FW12 + Rescor310M + Intek1120 + FW12)','T_{operational}', 'T_{payload}', 'FontSize', 7)
+%legend('T_{front wall}', 'T_{layer 1}','T_{layer 2}','T_{layer 3}', 'T_{back wall}','T_{operational}', 'T_{payload}', 'FontSize', 7)
 set(gcf,'color','w');
 
 %% Plotting parameters
 x = linspace(0, cumthick, n)*1000;
 baseline_t = ones(1,length(x))*(70+273.15); %back wall
 indices = [];
-for i = 1:5
-    indices(i) = floor(i*length(T_thickness)/5);
+labels = {};
+for i = 1:6
+    indices(i) = floor(i*length(T_thickness)/12);
+    time = indices(i)/length(T_thickness) * total_time;
+    labels{i} = ['t_{' num2str(time) ' s}'];
 end
+labels{7} = ['t_{' num2str(dt) ' s}'];
 %% Plotting along thickness
 figure(2)
 plot(x, T_thickness{1})
 hold on
-plot(x, T_thickness{inidices(1)})
+plot(x, T_thickness{indices(1)})
 hold on
-plot(x, T_thickness{inidices(2)})
+plot(x, T_thickness{indices(2)})
 hold on
-plot(x, T_thickness{inidices(3)})
+plot(x, T_thickness{indices(3)})
 hold on
-plot(x, T_thickness{inidices(4)})
+plot(x, T_thickness{indices(4)})
 hold on
-plot(x, T_thickness{inidices(5)})
+plot(x, T_thickness{indices(5)})
 hold on
-plot(x, baseline_t, '--', 'LineWidth',1)
+plot(x, T_thickness{indices(6)})
+hold on
+plot(x, baseline_t, 'r--', 'LineWidth',1)
 title('TPS Temperature across Thickness')
 ylabel('Temperature (K)')
 xlabel('Distance (mm)')
 xlim([0 cumthick*1000])
-legend('t_{0 s}', 't_{41.1 s}','t_{123 s}','t_{205.5 s}', 't_{411.5 s}', 't_{1012 s}','T_{payload}')
+legend(labels{7}, labels{1},labels{2},labels{3},labels{4},labels{5},labels{6},'T_{payload}')
 set(gcf,'color','w');
 
 %% plotting materials vs thickness

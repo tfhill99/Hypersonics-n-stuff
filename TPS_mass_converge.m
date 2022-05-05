@@ -1,14 +1,14 @@
 rigid = true;
 if rigid
     %% convergence with 1st and 4th, 2nd and 3rd materials coupled RIGID
-    %thickness = [0.0039 0.0066 0.0262 0.0039]; %thickness in m
-    %thickness = [0.005 0.05 0.07 0.005]; % starting thicknesseses for rigid
+    %thickness = [0.015 0.015 0.015 0.015]; %thickness in m
+    thickness = [0.005 0.05 0.07 0.005]; % starting thicknesseses for rigid
     %fill with large arbitary #s .005 .01 .05 .005
-    thickness = [0.0005 0.0098 0.0459 0.0005]; % rigid optimized %51473,32805
+    %thickness = [0.0005 0.0098 0.0459 0.0005]; % rigid optimized %51473,32805
     %thickness = [0.0010 0.0094 0.0437 0.0010];
     [temperatures] = heat_transfer_new(thickness); % gets initial temps
     
-    countmax = 15;
+    countmax = 4;
     thicknesses = thickness;
     prevthickness = thickness;
     savetemp = temperatures;
@@ -17,7 +17,7 @@ if rigid
         count = 0;
         while count < countmax && temperatures(4) < 306.64 %&& mass_sum_rigid < 3.5
             count = count + 1;
-            if temperatures(1) < 1650 && temperatures(2) < 573
+            if temperatures(1) < 1923 && temperatures(2) < 573
                 thicknesses(1) = thickness(1)*k(j);
                 thicknesses(4) = thickness(4)*k(j);
                 prevthickness(1) = thickness(1);
@@ -116,7 +116,10 @@ else
     %thickness = [0.00035 0.01 0.001 0.00025]; % starting thicknesses for %flexible mass 5.4550kg, but doesnt work 
     %thickness = [0.00025 0.0092 0.028 0.00032]; % optimized thickness %0.00031973
     %thickness = [0.00025 0.006 0.0219 0.0025]; 9.1316kg (1.38662194226018	1.12860707056498	5.15460097091327	1.46179893281638)
-    thickness = [0.0004 0.005 0.004 0.00025];
+    %thickness = [0.00035 0.001 0.025 0.0005]; % start
+    %thickness = [0.00027 0.0054 0.016 0.00025]; % works for flexible
+    %thickness = [0.0003 0.0054 0.015 0.00025];
+    thickness = [0.0025 0.0025 0.0025 0.0025];
 
     [temperatures] = heat_transfer_new(thickness); % gets initial temps
     countmax = 10;
@@ -128,7 +131,7 @@ else
     count = 0;
     while count < countmax && temperatures(4) < 337.8 %&& mass_sum_flexible < 5.5
         count = count + 1;
-        if temperatures(1) < 650 && thickness(1) > 0.00025
+        if temperatures(1) < 923 && thickness(1) > 0.00025
             thicknesses(1) = thickness(1)*k(j);
             prevthickness(1) = thickness(1);
         end
@@ -143,7 +146,7 @@ else
             temperatures(4) = savetemp(4);
             thickness(1) = prevthickness(1);
         end
-        if temperatures(1) > 650
+        if temperatures(1) > 923
             temperatures(1) = savetemp(1);
             thickness(1) = prevthickness(1);
         end
@@ -156,7 +159,7 @@ else
         end
         [temperatures] = heat_transfer_new(thicknesses);
         thickness(1) = thicknesses(1);
-        if temperatures(4) > 337.8 || temperatures(1) > 650
+        if temperatures(4) > 337.8 || temperatures(1) > 923
             temperatures(1) = savetemp(1);
             temperatures(2) = savetemp(2);
             temperatures(4) = savetemp(4);
@@ -170,7 +173,7 @@ else
  count = 0;
     while count < countmax && temperatures(4) < 337.8 %&& mass_sum_flexible < 5.5
         count = count + 1;
-        if temperatures(1) < 650 && thickness(4) > 0.00025
+        if temperatures(1) < 923 && thickness(4) > 0.00025
             thicknesses(4) = thickness(4)*k(j);
             prevthickness(4) = thickness(4);
         end
@@ -185,7 +188,7 @@ else
             temperatures(4) = savetemp(4);
             thickness(4) = prevthickness(4);
         end
-        if temperatures(1) > 650
+        if temperatures(1) > 923
             temperatures(1) = savetemp(1);
             thickness(4) = prevthickness(4);
         end
@@ -198,7 +201,7 @@ else
         end
         [temperatures] = heat_transfer_new(thicknesses);
         thickness(4) = thicknesses(4);
-        if temperatures(4) > 337.8 || temperatures(1) > 650
+        if temperatures(4) > 337.8 || temperatures(1) > 923
             temperatures(1) = savetemp(1);
             temperatures(2) = savetemp(2);
             temperatures(4) = savetemp(4);
@@ -212,7 +215,7 @@ else
     count = 0;
     while count < countmax && temperatures(4) < 337.8 %&& mass_sum_flexible < 5.5
         count = count + 1;
-        if temperatures(1) < 650 && thickness(2) > 0.0050
+        if temperatures(1) < 923 && thickness(2) > 0.0050
             thicknesses(2) = thickness(2)*k(j);
             prevthickness(2) = thickness(2);
         end
@@ -227,7 +230,7 @@ else
             temperatures(4) = savetemp(4);
             thickness(2) = prevthickness(2);
         end
-        if temperatures(1) > 650
+        if temperatures(1) > 923
             temperatures(1) = savetemp(1);
             thickness(2) = prevthickness(2);
         end
@@ -239,7 +242,7 @@ else
         savetemp(4) = temperatures(4);
         [temperatures] = heat_transfer_new(thicknesses);
         thickness(2) = thicknesses(2);
-        if temperatures(4) > 337.8 || temperatures(1) > 650
+        if temperatures(4) > 337.8 || temperatures(1) > 923
             temperatures(2) = savetemp(2);
             temperatures(4) = savetemp(4);
             thickness(2) = prevthickness(2);
@@ -252,7 +255,7 @@ else
     count = 0;
     while count < countmax && temperatures(4) < 337.8 %&& mass_sum_flexible < 5.5
         count = count + 1;
-        if temperatures(1) < 650 && thickness(3) > 0.00015
+        if temperatures(1) < 923 && thickness(3) > 0.00015
             thicknesses(3) = thickness(3)*k(j);
             prevthickness(3) = thickness(3);
         end
@@ -267,7 +270,7 @@ else
             temperatures(4) = savetemp(4);
             thickness(3) = prevthickness(3);
         end
-        if temperatures(1) > 650
+        if temperatures(1) > 923
             temperatures(1) = savetemp(1);
             thickness(3) = prevthickness(3);
         end
@@ -279,7 +282,7 @@ else
         savetemp(4) = temperatures(4);
         [temperatures] = heat_transfer_new(thicknesses);
         thickness(3) = thicknesses(3);
-        if temperatures(4) > 337.8 || temperatures(1) > 650
+        if temperatures(4) > 337.8 || temperatures(1) > 923
             temperatures(2) = savetemp(2);
             temperatures(4) = savetemp(4);
             thickness(3) = prevthickness(3);
