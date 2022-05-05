@@ -8,7 +8,7 @@ R_N = 0.272; %m
 %% Flexible TPS Materials
 [~, ~, ~ , ~, alpha_nextel, alpha_pyrogel, alpha_sigratherm, ~, ~, ~, ~, lambda_nextel, lambda_pyrogel, lambda_sigratherm] = TPS_materials();
 %%
-thickness = [0.0005, 0.0098, 0.0495, 0.0005]; %thickness in m
+thickness = [0.005, 0.03, 0.02, 0.005]; %thickness in m
 total_thickness = sum(thickness); %m
 alphas = [alpha_FW12, alpha_Rescor310M, alpha_Intek1120, alpha_FW12]; %m^2/s RIGID
 lambdas = [lambda_FW12, lambda_Rescor310M, lambda_Intek1120, lambda_FW12];%W/m/K RIGID
@@ -259,6 +259,5 @@ xlabel('Distance (mm)')
 xlim([0 cumthick*1000])
 legend('t_{front}', 't_{1}','t_{2}','t_{3}', 't_{back}')
 set(gcf,'color','w');
-
 
 end

@@ -379,7 +379,7 @@ end
 
 BC = [];
 for i = 1:length(broad_local_qw)
-    BC(i) = broad_local_qw{i}(idx(i)+1) - broad_local_qw{i}(idx(i)+2);
+    BC(i) = broad_local_qw{i}(idx(i)-1) - broad_local_qw{i}(idx(i));
     for j = idx(1)+2:length(broad_local_qw{1})
         broad_local_qw{i}(j) = broad_local_qw{i}(j) + BC(i);
     end
