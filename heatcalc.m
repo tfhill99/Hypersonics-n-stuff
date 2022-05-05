@@ -44,13 +44,13 @@ Load_Factor = acc/g;
 %% Plot optimized V vs Z
 figure(1)
 set(gcf,'color','w');
-plot(Mach, Z)
+plot(Mach, Z/1000)
 hold on
-plot(Load_Factor, Z_acc)
+plot(Load_Factor, Z_acc/1000)
 title('Trajectory Properties v/s Altitude (Optimized Flight Path')
 legend('Mach', 'Load Factor')
 xlabel('Property')
-ylabel('Altitude (m)')
+ylabel('Altitude (km)')
 
 %% Find Cp_0 along the Flight Path
 gamma = gamma_atmos;
@@ -65,7 +65,11 @@ R_N = 0.272; %m
 r = 0.71^0.5; %laminar flow
 R_H_NS_factor = ((gamma_atmos + 1) * Mach.^2)./(2 + (gamma_atmos - 1)*Mach.^2); 
 V_NS = V./R_H_NS_factor; 
-T_aw = T_traj + r*V_NS.^2/(2*1.4);
+
+const_1 = (2 * gamma_atmos)/(gamma_atmos + 1); 
+T_RH = T_traj .* (1 + const_1 * (Mach.^2 - 1)) ./ R_H_NS_factor; 
+
+T_aw = T_RH + r*V_NS.^2/(2*1.4);
 T_aw_2 = T_traj + r*V.^2/(2*1.4); 
 
 A_q = 1.83e-4 * R_N^(-1/2) * rho_traj.^(1/2) .* V.^(3); 
@@ -122,12 +126,12 @@ ylabel('Altitude(m)');
 title('Tauber Menees q_w at Stagnation');
 
 figure(3)
-plot(time(1:12000), q_w_stag_TM(1:12000)/1000); 
-hold on
-plot(time(1:12000), q_w_stag_TM_2(1:12000)/1000);
+plot(time(1:13000), q_w_stag_TM(1:13000)/1000); 
+%hold on
+%plot(time(1:12000), q_w_stag_TM_2(1:12000)/1000);
 ylabel('q_w (kW/m^2)'); 
 xlabel('Time (s)');
-title('Time History of Stagnation q_w Using Tauber Menees');
+%title('Time History of Stagnation q_w Using Tauber Menees');
 
 %% discretization
 z_needed = [120 110 100 90 82 78 70 65 62 58 56 52 48 42 35 30] * 1000; 
@@ -181,7 +185,7 @@ vect_indices_3 = find(pts(:,1) > 0);
 %[vect_indices, eh] = intersect(vect_indices, vect_indices_4); 
 
 
-for i = 1:7
+for i = 1:length(V)
     V_mag = V(i); 
     alpha = alpha_r(i);
 
@@ -234,9 +238,11 @@ for i = 1:7
 
         V_mag_new = norm([v_t, v_n2]); 
 
+        T_RH = T_traj(i) * (1 + const_1 * (Mach_new(i)^2 - 1)) / RH_factor;
+
 
         if i < 9
-            T_aw(j) = T_traj(i) + r*V_mag_new^2/(2*1.4);
+            T_aw(j) = T_RH + r*V_mag_new^2/(2*1.4);
             T_aw_test(j) = T_traj(i) + r*V_mag^2/(2*1.4);
         else
             T_aw(j) = T_traj(i) + r*V_mag^2/(2*1.4);
@@ -251,14 +257,14 @@ for i = 1:7
 
         F_val(j) = 1 - T_w(j)/T_aw(j); 
 
-        B_q = A_q / T_aw_test(j); 
-
-        func_haha = [1 0 0 B_q/(eps*sigma) -1*A_q/(eps*sigma)]; 
-        rn = roots(func_haha); 
-        temp = rn(rn == real(rn)); 
-        T_w_test(j) = temp(temp > 0);
-
-        F_test(j) = 1 - T_w_test(j)/T_aw_test(j); 
+%         B_q = A_q / T_aw_test(j); 
+% 
+%         func_haha = [1 0 0 B_q/(eps*sigma) -1*A_q/(eps*sigma)]; 
+%         rn = roots(func_haha); 
+%         temp = rn(rn == real(rn)); 
+%         T_w_test(j) = temp(temp > 0);
+% 
+%         F_test(j) = 1 - T_w_test(j)/T_aw_test(j); 
 
 
     end
@@ -325,6 +331,8 @@ for i = 1:7
     last_index = -1; 
     last_point = [];
 
+    starter = 0; 
+
     for lc2 = 2:length(cross_sec_cp)
         p2 = cross_sec_pts(lc2, :); 
         p1 = cross_sec_pts(lc2-1, :); 
@@ -332,24 +340,31 @@ for i = 1:7
         % x_dist(lc2) = x_dist(lc2) / 1000;  
 
         phi = abs(atan(abs(p2(1))/(p2(3)-291)));
+        
        
-        if phi < pi/4 
+        if phi <= pi/4 
             cross_sec_qw(lc2) = q_w_stag_TM_new(i) * (a * cos(phi)^1.5 + b); 
             x_dist_plot(lc2) = phi/(2*pi) * (2 * pi * 0.272); 
             last_index = lc2; 
             last_point = p2; 
             x_dist(lc2) = x_dist_plot(lc2); 
         else
-            x_dist(lc2) = x_dist(lc2-1) + (norm(p2 - p1))/1000; 
+            p1 = [216.494090836922	3.46193997733974	529.622189043814]; % taken from workspace (point where sphere stops)
+            x_dist(lc2) = 0.35 + (norm(p2 - p1, 2))/1000; 
+            
+           
+            C = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4)^(0.5) * (x_dist(lc2))^(-0.5) * (1 - cross_sec_Tw(lc2)/cross_sec_Taw(lc2)); 
+            N = 0.5; 
+            M = 3.2; 
+            cross_sec_qw(lc2) = C * rho_traj(i)^N * V_mag^M; 
+
+            %x_dist(lc2) = x_dist(lc2-1) + ((p2(1) - p1(1))*sin(pi/4))/1000; 
             %C = 2.2e-5 * cos(cross_sec_alpha(lc2))^2.08 * sin(cross_sec_alpha(lc2))^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
             
             % C = 2.2e-5 * cos(pi/4)^2.08 * sin(pi/4)^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
 
-            C = 4.03e-5 * cos(pi/4)^(0.5) * sin(pi/4) * x_dist(lc2)^(-1/2) * (1 - cross_sec_Tw(lc2)/cross_sec_Taw(lc2)); 
-            N = 0.5; 
-            M = 3.2; 
-            cross_sec_qw(lc2) = C * rho_traj(i)^N * V_mag^M; 
-            x_dist_plot(lc2) = x_dist(lc2); 
+            x_dist_plot(lc2) = x_dist(lc2) - 0.15; 
+
         end
        
         %C = 2.2e-5 * cos(cross_sec_alpha(lc2))^2.08 * sin(cross_sec_alpha(lc2))^1.6 * x_dist(lc2)^(-1/5) * (1 - (1.11 * cross_sec_Tw(lc2))/(cross_sec_Taw(lc2)));
@@ -362,7 +377,6 @@ for i = 1:7
     broad_local_x_dist{i} = x_dist; 
     broad_local_x{i} = cross_sec_pts(:, 1); 
     broad_local_x_dist_plot{i} = x_dist_plot; 
-
     
 end
 
