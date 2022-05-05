@@ -53,9 +53,11 @@ lambda_nextel = mean(lambdas_nextel); % W/(K*m)
 
 lambdas_sigratherm = [0.050 0.055 0.055 0.080 0.081 0.11 0.18]; 
 lambda_sigratherm = mean(lambdas_sigratherm); % W/(K*m)
+%lambda_sigratherm = 0.050;
 
 lambdas_pyrogel = [0.014 0.015 0.020 0.033 0.035 0.40]; 
 lambda_pyrogel = mean(lambdas_pyrogel); % W/(K*m)
+%lambda_pyrogel = 0.014;
 
 alpha_nextel = lambda_nextel/(rho_nextel*c_nextel);
 alpha_sigratherm = lambda_sigratherm/(rho_sigratherm*c_sigratherm);
